@@ -1,0 +1,5 @@
+UnlitGeneric {
+	$translucent 1
+	$additive 1
+	$basetexture gwater2/sphere
+}

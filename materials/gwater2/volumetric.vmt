@@ -1,0 +1,6 @@
+GWaterVolumetric {
+	$basetexture gwater2/sphere
+	$additive 1
+	$alpha 0.125
+	$translucent 1
+}

@@ -1,0 +1,12 @@
+[submodule "binary/FleX"]
+	path = binary/FleX
+	url = https://github.com/NVIDIAGameWorks/FleX
+[submodule "binary/GMFS"]
+	path = binary/GMFS
+	url = https://github.com/Derpius/GMFS
+[submodule "binary/garrysmod_common"]
+	path = binary/garrysmod_common
+	url = https://github.com/danielga/garrysmod_common
+[submodule "binary/BSPParser"]
+	path = binary/BSPParser
+	url = https://github.com/Derpius/BSPParser

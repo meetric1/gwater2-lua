@@ -1,0 +1,7 @@
+VertexLitGeneric {
+	$envmap env_cubemap
+	$envmaptint "[0.0 0.0 0.0]"
+	$color2 "[0.5 0.7 0.9 1]"
+	$basetexture lights/white
+	$nocull 1
+}
