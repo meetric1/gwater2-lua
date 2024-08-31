@@ -1,11 +1,13 @@
 AddCSLuaFile()
 
-local in_water = include("gwater2_swimming.lua")
-include("gwater2_net.lua")
-
-if SERVER then return end
+if SERVER then 
+	include("gwater2_net.lua")
+	include("gwater2_interactions.lua")
+	return
+end
 
 require((BRANCH == "x86-64" or BRANCH == "chromium" ) and "gwater2" or "gwater2_main")	-- carrying
+
 include("gwater2_shaders.lua")
 
 -- GetMeshConvexes but for client
@@ -73,6 +75,8 @@ local function get_map_vertices()
 	return all_vertices
 end
 
+local in_water = function() end
+
 gwater2 = {
 	solver = FlexSolver(100000),
 	renderer = FlexRenderer(),
@@ -135,6 +139,9 @@ gwater2 = {
 		return mat
 	end
 }
+
+include("gwater2_net.lua")
+in_water = include("gwater2_interactions.lua")
 
 -- setup percentage values (used in menu)
 gwater2["surface_tension"] = gwater2.solver:GetParameter("surface_tension") * gwater2.solver:GetParameter("radius")^4	-- dont ask me why its a power of 4

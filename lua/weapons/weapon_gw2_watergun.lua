@@ -1,14 +1,14 @@
 SWEP.PrintName = "Water Gun"
     
-SWEP.Author = "Mee / Neatro" 
-SWEP.Purpose = "shoot water man"
-SWEP.Instructions = "just left click"
+SWEP.Author = "Mee / Neatro / googer_" 
+SWEP.Purpose = "shoots water"
+SWEP.Instructions = "you'll figure it out"
 SWEP.Category = "GWater2" 
 SWEP.DrawAmmo       = false
 SWEP.DrawCrosshair	= true
 SWEP.DrawWeaponInfoBox = false
 
-SWEP.Spawnable = true --Must be true
+SWEP.Spawnable = true
 SWEP.AdminOnly = false
 
 SWEP.AutoSwitchTo = false
