@@ -75,7 +75,7 @@ local function get_map_vertices()
 	return all_vertices
 end
 
-local in_water = function() end
+local in_water = include("gwater2_interactions.lua")
 
 gwater2 = {
 	solver = FlexSolver(100000),
@@ -141,7 +141,6 @@ gwater2 = {
 }
 
 include("gwater2_net.lua")
-in_water = include("gwater2_interactions.lua")
 
 -- setup percentage values (used in menu)
 gwater2["surface_tension"] = gwater2.solver:GetParameter("surface_tension") * gwater2.solver:GetParameter("radius")^4	-- dont ask me why its a power of 4
