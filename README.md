@@ -1,2 +1,2 @@
-# Gwater2 but with the funnies 
-# now held together by hopes and dreams
+# Gwater2 [![made with - mee++](https://img.shields.io/badge/made_with-mee%2B%2B-2ea44f)](https://)
+# now with better physics
