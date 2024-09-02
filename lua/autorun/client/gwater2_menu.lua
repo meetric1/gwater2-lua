@@ -15,20 +15,20 @@ gwater2.options = gwater2.options or {
 	menu_key = CreateClientConVar("gwater2_menu2key", KEY_G, true),
 	menu_tab = CreateClientConVar("gwater2_menu2tab", "1", true),
 
-	config_bitflag = CreateConVar("gwater2_menu2cfg", "1", FCVAR_ARCHIVE + FCVAR_UNREGISTERED, "don't"),
+	config_cache = nil,
+
 	write_config = function(tbl)
 		local real = gwater2.options.read_config()
-		if tbl.sounds == nil then tbl.sounds = real.sounds end
-		gwater2.options.config_bitflag:SetInt(
-			(tbl.sounds and 1 or 0) * 1
-		)
+		for k,v in pairs(real) do
+			if tbl[k] == nil then tbl[k] = v end
+		end
+		file.Write("gwater2/config.txt", util.TableToJSON(tbl))
+		gwater2.options.config_cache = tbl
 	end,
 	read_config = function()
-		local bitflag = gwater2.options.config_bitflag:GetInt()
-		local sounds = bit.band(bitflag, 1) == 1
-		return {
-			["sounds"]=sounds
-		}
+		if gwater2.options.config_cache then return gwater2.options.config_cache end
+		gwater2.options.config_cache = util.JSONToTable(file.Read("gwater2/config.txt") or "{}")
+		return gwater2.options.config_cache
 	end,
 
 	parameters = {
@@ -86,6 +86,13 @@ gwater2.options = gwater2.options or {
 		end, defined=true}
 	}
 }
+
+if not file.Exists("gwater2/config.txt") then
+	gwater2.options.write_config({
+		["sounds"]=true,
+		["animations"]=true,
+		["preview"]=true
+	})
 
 gwater2.options.solverd.average_fps = 1 / 60
 
@@ -197,6 +204,10 @@ local function create_menu()
 	function reset:DoClick()
 		gwater2.options.solver:Reset()
 		if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/reset.wav", 75, 100, 1, CHAN_STATIC) end
+	end
+
+	if not gwater2.options.read_config().preview then
+		sim_preview:SetVisible(false)
 	end
 
 	help_text:SetSize(frame:GetWide()*0.25, help_text:GetTall())
@@ -336,6 +347,32 @@ local function create_menu()
 	        	return true
 	        end
     	})
+
+    	util.make_parameter_check(tab, "Menu.animations", "Animations", {
+	        func=function(val)
+	        	gwater2.options.write_config({["animations"]=val})
+	        	return true
+	        end,
+	        setup=function(check)
+	        	check:GetParent().button:Remove()
+	        	check:SetValue(gwater2.options.read_config().animations)
+	        	return true
+	        end
+    	})
+
+    	util.make_parameter_check(tab, "Menu.preview", "Preview", {
+	        func=function(val)
+	        	gwater2.options.write_config({["preview"]=val})
+	        	sim_preview:SetVisible(val)
+	        	frame:InvalidateLayout()
+	        	return true
+	        end,
+	        setup=function(check)
+	        	check:GetParent().button:Remove()
+	        	check:SetValue(gwater2.options.read_config().preview)
+	        	return true
+	        end
+    	})
 	end
 
 	tabs.help_text = help_text
@@ -359,12 +396,27 @@ local function create_menu()
 		tab = tab.Tab
 		function tab:Paint(w, h)
 			styling.draw_main_background(0, 0, w - 4, self:IsActive() and h - 4 or h)
-			if tab.lastpush ~= nil and RealTime() - tab.lastpush < 0.5 then
+			if tab.lastpush ~= nil then
 				local delta = 1 - (RealTime() - tab.lastpush) * 2
-				surface.SetDrawColor(0, 127, 255, 255*delta)
-				surface.DrawRect(0, 0, w - 4, self:IsActive() and h - 4 or h)
-				surface.SetDrawColor(255, 255, 255, 255*delta)
-				surface.DrawOutlinedRect(0, 0, w - 4, self:IsActive() and h - 4 or h)
+				if RealTime() - tab.lastpush < 0.5 then
+					surface.SetDrawColor(0, 127, 255, 255*delta)
+					surface.DrawRect(0, 0, w - 4, self:IsActive() and h - 4 or h)
+					surface.SetDrawColor(255, 255, 255, 255*delta)
+					surface.DrawOutlinedRect(0, 0, w - 4, self:IsActive() and h - 4 or h)
+				end
+				if gwater2.options.read_config().animations then
+					local children = {}
+					local function _(p)
+						for __,child in pairs(p:GetChildren()) do
+							children[#children+1] = child
+							_(child)
+						end
+					end
+					_(rt.Panel:GetChildren()[1])
+					for i,v in pairs(children) do
+						v:SetAlpha((1-delta-i/500)*255*4)
+					end
+				end
 			end
 			surface.SetDrawColor(255, 255, 255, 255)
 		end

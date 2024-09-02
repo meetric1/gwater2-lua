@@ -165,7 +165,7 @@ local function make_parameter_scratch(tab, locale_parameter_name, parameter_name
 		elseif not hovered and panel.washovered then
 			panel.washovered = false
 			gwater2.cursor_busy = nil
-			if tab.help_text:GetText() == parameter["desc"] then
+			if tab.help_text:GetText() == get_localised(locale_parameter_name..".desc") then
 				tab.help_text:SetText(defhelptext)
 			end
 			label:SetColor(Color(255, 255, 255))
@@ -229,7 +229,7 @@ local function make_parameter_color(tab, locale_parameter_name, parameter_name, 
 		elseif not hovered and panel.washovered then
 			panel.washovered = false
 			gwater2.cursor_busy = nil
-			if tab.help_text:GetText() == parameter["desc"] then
+			if tab.help_text:GetText() == get_localised(locale_parameter_name..".desc") then
 				tab.help_text:SetText(defhelptext)
 			end
 			label:SetColor(Color(255, 255, 255))
@@ -290,7 +290,7 @@ local function make_parameter_check(tab, locale_parameter_name, parameter_name, 
 		elseif not hovered and panel.washovered then
 			panel.washovered = false
 			gwater2.cursor_busy = nil
-			if tab.help_text:GetText() == parameter["desc"] then
+			if tab.help_text:GetText() == get_localised(locale_parameter_name..".desc") then
 				tab.help_text:SetText(defhelptext)
 			end
 			label:SetColor(Color(255, 255, 255))
