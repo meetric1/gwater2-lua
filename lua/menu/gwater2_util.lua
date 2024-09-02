@@ -25,13 +25,51 @@ local function is_hovered_any(panel)
 end
 
 local function set_gwater_parameter(option, val)
-	-- nondirect options (eg. parameter scales based on radius)
+	local parsed = false
+
+	local rval = val
+
+	if type(val) == "table" and val[5] == "COLOR" and not parsed then
+		val = Color(val[1], val[2], val[3], val[4])
+		parsed = true
+	end
+	if IsColor(val) and not parsed then
+		val = val:ToTable()
+		val[5] = "COLOR"
+		parsed = true
+	end
+	parsed = nil
+
+	gwater2.ChangeParameter(option, val)
+
+	val = rval
+
+	gwater2.options.parameters[option].real = val
+
+	if gwater2.options.initialised[option][1].type == "scratch" or
+		gwater2.options.initialised[option][1].type == "check" then
+		gwater2.options.initialised[option][2].block = true
+		gwater2.options.initialised[option][2]:SetValue(val)
+		gwater2.options.initialised[option][2].block = false
+	end
+
+	if gwater2.options.initialised[option][1].type == "color" then
+		gwater2.options.initialised[option][2].block = true
+		gwater2.options.initialised[option][2]:SetColor(val)
+		gwater2.options.initialised[option][2].block = false
+	end
+
+	if gwater2.options.initialised[option][1].func then
+		if gwater2.options.initialised[option][1].func(val) then return end
+	end
+
 	if gwater2.options.parameters[option].defined then
 		gwater2.options.parameters[option].val = val
 		gwater2.options.parameters[option].func()
 		return
 	end
 
+	-- nondirect options (eg. parameter scales based on radius)
 	if gwater2[option] then
 		gwater2[option] = val
 		if option == "surface_tension" then	-- hack hack hack! this parameter scales based on radius
@@ -116,7 +154,7 @@ local function make_parameter_scratch(tab, locale_parameter_name, parameter_name
 	local slider = panel:Add("DNumSlider")
 	slider:SetMinMax(parameter.min, parameter.max)
 	pcall(function()
-		parameter_name = string.lower(parameter_name):gsub(" ", "_")
+		local parameter_name = string.lower(parameter_name):gsub(" ", "_")
 		if gwater2.options.parameters[parameter_name] and gwater2.options.parameters[parameter_name].defined then
 			slider:SetValue(gwater2.options.parameters[parameter_name].val)
 			return
@@ -138,17 +176,18 @@ local function make_parameter_scratch(tab, locale_parameter_name, parameter_name
 	slider.Label:Hide()
 	slider.TextArea:SizeToContents()
 	if parameter.setup then parameter.setup(slider) end
+	gwater2.options.initialised[string.lower(parameter_name):gsub(" ", "_")] = {parameter, slider}
 	function button:DoClick()
 		slider:SetValue(gwater2.options.parameters[string.lower(parameter_name):gsub(" ", "_")].default)
-		if gwater2.options.read_config().sounds then  LocalPlayer():EmitSound("gwater2/menu/reset.wav", 75, 100, 1, CHAN_STATIC) end
+		if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/reset.wav", 75, 100, 1, CHAN_STATIC) end
 	end
 	function slider:OnValueChanged(val)
+		if slider.block then return end
 		if parameter.decimals == 0 and val ~= math.Round(val, parameter.decimals) then
 			self:SetValue(math.Round(val, parameter.decimals))
 			return
 		end
 		gwater2.options.parameters[string.lower(parameter_name):gsub(" ", "_")].real = val
-		if parameter.func then if parameter.func(val) then return end end
 		set_gwater_parameter(string.lower(parameter_name):gsub(" ", "_"), val)
 	end
 	local defhelptext = nil
@@ -207,14 +246,19 @@ local function make_parameter_color(tab, locale_parameter_name, parameter_name, 
 	panel.button = button
 	panel.mixer = mixer
 	panel.label = label
+
+	if parameter.setup then parameter.setup(mixer) end
+	gwater2.options.initialised[string.lower(parameter_name):gsub(" ", "_")] = {parameter, mixer}
 	function button:DoClick()
-		mixer:SetColor(gwater2.options.parameters.color.default)
+		slider:SetValue(gwater2.options.parameters[string.lower(parameter_name):gsub(" ", "_")].default)
 		if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/reset.wav", 75, 100, 1, CHAN_STATIC) end
 	end
-	function mixer:ValueChanged(col)
-		gwater2.options.parameters.color.real = Color(col.r, col.g, col.b, col.a)
-		parameter.func(col)
+	function mixer:ValueChanged(val)
+		if mixer.block then return end
+		gwater2.options.parameters[string.lower(parameter_name):gsub(" ", "_")].real = val
+		set_gwater_parameter(string.lower(parameter_name):gsub(" ", "_"), Color(val.r, val.g, val.b, val.a))
 	end
+
 	local defhelptext = nil
 	function panel:Paint()
 		if gwater2.cursor_busy ~= panel and gwater2.cursor_busy ~= nil and IsValid(gwater2.cursor_busy) then return end
@@ -271,6 +315,7 @@ local function make_parameter_check(tab, locale_parameter_name, parameter_name, 
 		if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/reset.wav", 75, 100, 1, CHAN_STATIC) end
 	end
 	function check:OnChange(val)
+		if check.block then return end
 		if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/toggle.wav", 75, 100, 1, CHAN_STATIC) end
 		gwater2.options.parameters[string.lower(parameter_name):gsub(" ", "_")].real = val
 		if parameter.func then if parameter.func(val) then return end end

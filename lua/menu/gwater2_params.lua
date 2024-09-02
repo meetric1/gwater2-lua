@@ -139,12 +139,13 @@ local visuals = {
 		type="color",
 		func=function(col)
 			local finalpass = Material("gwater2/finalpass")
-			local col = Color(gwater2.options.parameters.color.real:Unpack())
+			local col = Color(col:Unpack())
 			col.r = col.r * gwater2.options.parameters.color_value_multiplier.real
 			col.g = col.g * gwater2.options.parameters.color_value_multiplier.real
 			col.b = col.b * gwater2.options.parameters.color_value_multiplier.real
 			col.a = col.a * gwater2.options.parameters.color_value_multiplier.real
 			finalpass:SetVector4D("$color2", col:Unpack())
+			return true
 		end
 	},
 	["007-Color Value Multiplier"] = {

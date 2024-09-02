@@ -94,7 +94,7 @@ else	-- CLIENT
 	end
 
 	local util = include("menu/gwater2_util.lua")
-	net.Receive("GWATER2_CHANGEPARAMETER", function(len, ply)
+	net.Receive("GWATER2_CHANGEPARAMETER", function(len)
 		util.set_gwater_parameter(net.ReadString(), net.ReadType())
 	end)
 

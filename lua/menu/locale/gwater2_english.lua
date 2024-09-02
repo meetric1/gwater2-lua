@@ -311,8 +311,16 @@ local strings = {
 	["gwater2.menu.Menu.title"]="Menu",
 	["gwater2.menu.Menu.titletext"]="Menu",
 	["gwater2.menu.Menu.help"]=[[
-		This tab controls visuals and behavior of menu
+		This tab controls visuals and behavior of menu.
+
+		Hover over a parameter to see it's description.
 	]],
+	["gwater2.menu.Menu.sounds"]="Play sounds",
+	["gwater2.menu.Menu.animations"]="Animate menu",
+	["gwater2.menu.Menu.preview"]="Show fluid preview",
+
+	["gwater2.menu.Fluid Preview.title"]="Fluid Preview",
+	["gwater2.menu.Explanation Area.title"]="Explanation Area"
 }
 
 return strings, "english"

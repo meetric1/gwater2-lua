@@ -31,6 +31,7 @@ gwater2.options = gwater2.options or {
 		return gwater2.options.config_cache
 	end,
 
+	initialised = {},
 	parameters = {
 		color = {real=Color(209, 237, 255, 25), default=Color(209, 237, 255, 25)},
 		color_value_multiplier = {real=1, default=1, val=1, func=function()
@@ -44,55 +45,26 @@ gwater2.options = gwater2.options or {
 			col.a = col.a * gwater2.options.parameters.color_value_multiplier.real
 			finalpass:SetVector4D("$color2", col:Unpack())
 		end, defined=true},
-		swimfriction = {real=1, default=1, val=1, func=function()
-			local val = gwater2.options.parameters.swimfriction.val
-			gwater2.ChangeParameter("swimfriction", val)
-		end, defined=true},
-		swimspeed = {real=2, default=2, val=2, func=function()
-			local val = gwater2.options.parameters.swimspeed.val
-			gwater2.ChangeParameter("swimspeed", val)
-		end, defined=true},
-		swimbuoyancy = {real=0.5, default=0.5, val=0.5, func=function()
-			local val = gwater2.options.parameters.swimbuoyancy.val
-			gwater2.ChangeParameter("swimbuoyancy", val)
-		end, defined=true},
-		drowntime = {real=4, default=4, val=4, func=function()
-			local val = gwater2.options.parameters.drowntime.val
-			gwater2.ChangeParameter("drowntime", val)
-		end, defined=true},
-		drowndamage = {real=0.25, default=0.25, val=0.25, func=function()
-			local val = gwater2.options.parameters.drowndamage.val
-			gwater2.ChangeParameter("drowndamage", val)
-		end, defined=true},
-		drownparticles = {real=60, default=60, val=60, func=function()
-			local val = gwater2.options.parameters.drownparticles.val
-			gwater2.ChangeParameter("drownparticles", val)
-		end, defined=true},
-		multiplyparticles = {real=60, default=60, val=60, func=function()
-			local val = gwater2.options.parameters.multiplyparticles.val
-			gwater2.ChangeParameter("multiplyparticles", val)
-		end, defined=true},
-		multiplywalk = {real=1, default=1, val=1, func=function()
-			local val = gwater2.options.parameters.multiplywalk.val
-			gwater2.ChangeParameter("multiplywalk", val)
-		end, defined=true},
-		multiplyjump = {real=1, default=1, val=1, func=function()
-			local val = gwater2.options.parameters.multiplyjump.val
-			gwater2.ChangeParameter("multiplyjump", val)
-		end, defined=true},
-		touchdamage = {real=0, default=0, val=0, func=function()
-			local val = gwater2.options.parameters.touchdamage.val
-			gwater2.ChangeParameter("touchdamage", val)
-		end, defined=true}
+		swimfriction = {real=1, default=1, val=1, defined=true},
+		swimspeed = {real=2, default=2, val=2, defined=true},
+		swimbuoyancy = {real=0.5, default=0.5, val=0.5, defined=true},
+		drowntime = {real=4, default=4, val=4, defined=true},
+		drowndamage = {real=0.25, default=0.25, val=0.25, defined=true},
+		drownparticles = {real=60, default=60, val=60, defined=true},
+		multiplyparticles = {real=60, default=60, val=60, defined=true},
+		multiplywalk = {real=1, default=1, val=1, defined=true},
+		multiplyjump = {real=1, default=1, val=1, defined=true},
+		touchdamage = {real=0, default=0, val=0, defined=true}
 	}
 }
 
-if not file.Exists("gwater2/config.txt") then
+if not file.Exists("gwater2/config.txt", "DATA") then
 	gwater2.options.write_config({
 		["sounds"]=true,
 		["animations"]=true,
 		["preview"]=true
 	})
+end
 
 gwater2.options.solverd.average_fps = 1 / 60
 
@@ -158,9 +130,18 @@ local function create_menu()
 	local sim_preview = vgui.Create("DPanel", frame)
 	local help_text = vgui.Create("DPanel", frame)
 	local tabs = vgui.Create("DPropertySheet", frame)
-	sim_preview:Dock(LEFT)
+	local divider = vgui.Create("DHorizontalDivider", frame)
+	--sim_preview:Dock(LEFT)
 	help_text:Dock(RIGHT)
 	sim_preview:SetSize(frame:GetWide()*0.25, sim_preview:GetTall())
+
+	divider:Dock(FILL)
+
+	divider:SetLeft(sim_preview)
+	divider:SetRight(tabs)
+	divider:SetDividerWidth(4)
+	divider:SetLeftWidth(sim_preview:GetWide())
+	divider:SetLeftMin(20)
 
 	local particle_material = CreateMaterial("gwater2_menu_material", "UnlitGeneric", {
 		["$basetexture"] = "vgui/circle",
@@ -194,13 +175,17 @@ local function create_menu()
 			surface.SetDrawColor(absorption[1] * 255, absorption[2] * 255, absorption[3] * 255, 255)
 			surface.DrawTexturedRect(pos[1] - x, pos[3] - y, radius, radius)
 		end)
+
+		styling.draw_main_background(0, 0, sim_preview:GetWide(), 30)
+		draw.DrawText(util.get_localised("Fluid Preview.title"), "GWater2Title", sim_preview:GetWide() / 2 + 1, 6, Color(0, 0, 0), TEXT_ALIGN_CENTER)
+		draw.DrawText(util.get_localised("Fluid Preview.title"), "GWater2Title", sim_preview:GetWide() / 2, 5, Color(187, 245, 255), TEXT_ALIGN_CENTER)
 	end
 	local reset = sim_preview:Add("DButton")
 	reset:SetText("")
 	reset:SetImage("icon16/arrow_refresh.png")
 	reset:SetWide(reset:GetTall())
 	reset.Paint = nil
-	reset:SetPos(sim_preview:GetWide() - reset:GetWide() - 5, 5)
+	reset:SetPos(5, 5)
 	function reset:DoClick()
 		gwater2.options.solver:Reset()
 		if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/reset.wav", 75, 100, 1, CHAN_STATIC) end
@@ -208,15 +193,24 @@ local function create_menu()
 
 	if not gwater2.options.read_config().preview then
 		sim_preview:SetVisible(false)
+		divider:SetLeft(nil)
+		divider:SetLeftWidth(0)
+		divider:SetLeftMin(0)
+		divider:SetDividerWidth(0)
 	end
 
 	help_text:SetSize(frame:GetWide()*0.25, help_text:GetTall())
-	function help_text:Paint(w, h) styling.draw_main_background(0, 0, w, h) end
-	tabs:Dock(FILL)
+	function help_text:Paint(w, h)
+		styling.draw_main_background(0, 0, w, h)
+		draw.DrawText(util.get_localised("Explanation Area.title"), "GWater2Title", help_text:GetWide() / 2 + 1, 6, Color(0, 0, 0), TEXT_ALIGN_CENTER)
+		draw.DrawText(util.get_localised("Explanation Area.title"), "GWater2Title", help_text:GetWide() / 2, 5, Color(187, 245, 255), TEXT_ALIGN_CENTER)
+	end
+	--tabs:Dock(FILL)
 	tabs:SetFadeTime(0)
 	help_text = help_text:Add("DLabel")
 	help_text:Dock(FILL)
 	help_text:DockMargin(5, 5, 5, 5)
+	help_text:SetTextInset(0, 24)
 	help_text:SetWrap(true)
 	help_text:SetColor(Color(255, 255, 255))
 	help_text:SetContentAlignment(7)
@@ -364,6 +358,17 @@ local function create_menu()
 	        func=function(val)
 	        	gwater2.options.write_config({["preview"]=val})
 	        	sim_preview:SetVisible(val)
+	        	if not val then
+	        		divider:SetLeft(nil)
+	        		divider:SetLeftWidth(0)
+					divider:SetLeftMin(0)
+					divider:SetDividerWidth(0)
+	        	else
+	        		divider:SetLeft(sim_preview)
+	        		divider:SetLeftWidth(sim_preview:GetWide())
+					divider:SetLeftMin(20)
+					divider:SetDividerWidth(4)
+	        	end
 	        	frame:InvalidateLayout()
 	        	return true
 	        end,
@@ -390,6 +395,8 @@ local function create_menu()
 	hook.Run("GWater2MenuAfterTab", "presets", presets.presets_tab(tabs, _parameters, _visuals, _performance, _interaction))
 	hook.Run("GWater2MenuAfterTab", "supporters", supporters_tab(tabs))
 	hook.Run("GWater2MenuAfterTab", "menu", menu_tab(tabs))
+
+	frame.params = {parameters=_parameters, visuals=_visuals, performance=_performance, interaction=_interaction}
 
 	for _,tab in pairs(tabs:GetItems()) do
 		local rt = tab
@@ -435,6 +442,7 @@ local function create_menu()
 		new.lastpush = RealTime()
 		help_text:GetParent():SetParent(new:GetPanel())
 		help_text:GetParent():Dock(RIGHT)
+		help_text:SetWide(help_text:GetWide()*2)
 	end
 	tabs:SetActiveTab(tabs.Items[gwater2.options.menu_tab:GetInt()].Tab)
 	hook.Run("GWater2MenuPostInitialize", frame)
@@ -478,23 +486,22 @@ surface.CreateFont("GWater2Title", {
     outline = false,
 })
 
-local frame = nil
 concommand.Add("gwater2_menu2", function()
-	if frame == nil or not IsValid(frame) then
-		frame = create_menu()
+	if gwater2.options.frame == nil or not IsValid(gwater2.options.frame) then
+		gwater2.options.frame = create_menu()
 		return
 	end
-	frame:Close()
-	frame = nil
+	gwater2.options.frame:Close()
+	gwater2.options.frame = nil
 end)
 
 hook.Add("GUIMousePressed", "gwater2_menu2close", function(mouse_code, aim_vector)
 	if not IsValid(frame) then return end
 
 	local x, y = gui.MouseX(), gui.MouseY()
-	local frame_x, frame_y = frame:GetPos()
-	if x < frame_x or x > frame_x + frame:GetWide() or y < frame_y or y > frame_y + frame:GetTall() then
-		frame:Remove()
+	local frame_x, frame_y = gwater2.options.frame:GetPos()
+	if x < frame_x or x > frame_x + gwater2.options.frame:GetWide() or y < frame_y or y > frame_y + gwater2.options.frame:GetTall() then
+		gwater2.options.frame:Remove()
 	end
 end)
 
