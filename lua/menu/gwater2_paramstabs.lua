@@ -149,7 +149,7 @@ end
 local function interaction_tab(tabs)
 	local tab = vgui.Create("DPanel", tabs)
 	function tab:Paint() end
-	tabs:AddSheet(util.get_localised("Interactions.title"), tab, "icon16/application_xp_terminal.png").Tab.realname = "Interactions"
+	tabs:AddSheet(util.get_localised("Interactions.title"), tab, "icon16/chart_curve.png").Tab.realname = "Interactions"
 	tab = tab:Add("GF_ScrollPanel")
 	tab:Dock(FILL)
 

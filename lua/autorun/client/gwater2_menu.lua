@@ -12,7 +12,7 @@ gwater2.options = gwater2.options or {
 	blur_passes = CreateClientConVar("gwater2_blur_passes", "3", true),
 	absorption = CreateClientConVar("gwater2_absorption", "1", true),
 	depth_fix = CreateClientConVar("gwater2_depth_fix", "0", true),
-	menu_key = CreateClientConVar("gwater2_menu2key", KEY_H, true),
+	menu_key = CreateClientConVar("gwater2_menu2key", KEY_G, true),
 	menu_tab = CreateClientConVar("gwater2_menu2tab", "1", true),
 	parameters = {
 		color = {real=Color(209, 237, 255, 25), default=Color(209, 237, 255, 25)},
@@ -291,6 +291,29 @@ local function create_menu()
 		return tab
 	end
 
+	local function menu_tab(tabs)
+		local tab = vgui.Create("DPanel", tabs)
+		function tab:Paint() end
+
+		tabs:AddSheet(util.get_localised("Menu.title"), tab, "icon16/css_valid.png").Tab.realname = "Menu"
+		tab = tab:Add("GF_ScrollPanel")
+		tab:Dock(FILL)
+		tab.help_text = tabs.help_text
+
+		styling.define_scrollbar(tab:GetVBar())
+
+		local _ = tab:Add("DLabel") _:SetText(" ") _:SetFont("GWater2Title") _:Dock(TOP) _:SizeToContents()
+		function _:Paint(w, h)
+			draw.DrawText(util.get_localised("Menu.titletext"), "GWater2Title", 6, 6, Color(0, 0, 0), TEXT_ALIGN_LEFT)
+			draw.DrawText(util.get_localised("Menu.titletext"), "GWater2Title", 5, 5, Color(187, 245, 255), TEXT_ALIGN_LEFT)
+		end
+
+		util.make_parameter_check(tab, "Menu.sounds", "Sounds", {
+	        func=function(val) return true end,
+	        setup=function(check) return true end
+    	})
+	end
+
 	tabs.help_text = help_text
 
 	help_text:SetText(util.get_localised("About Tab.help"))
@@ -305,6 +328,7 @@ local function create_menu()
 	local _interaction, _tab = paramstabs.interaction_tab(tabs)
 	hook.Run("GWater2MenuAfterTab", "presets", presets.presets_tab(tabs, _parameters, _visuals, _performance, _interaction))
 	hook.Run("GWater2MenuAfterTab", "supporters", supporters_tab(tabs))
+	hook.Run("GWater2MenuAfterTab", "menu", menu_tab(tabs))
 
 	for _,tab in pairs(tabs:GetItems()) do
 		local rt = tab

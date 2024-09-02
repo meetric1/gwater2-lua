@@ -306,7 +306,13 @@ local strings = {
 	["gwater2.menu.Interactions.MultiplyJump"]="Jump Power Multiplier",
 	["gwater2.menu.Interactions.MultiplyJump.desc"]="Determines how much your jump power is multiplied by.",
 	["gwater2.menu.Interactions.TouchDamage"]="Touch Damage",
-	["gwater2.menu.Interactions.TouchDamage.desc"]="Controls how much damage will be dealt every tick that you are in water."
+	["gwater2.menu.Interactions.TouchDamage.desc"]="Controls how much damage will be dealt every tick that you are in water.",
+
+	["gwater2.menu.Menu.title"]="Menu",
+	["gwater2.menu.Menu.titletext"]="Menu",
+	["gwater2.menu.Menu.help"]=[[
+		This tab controls visuals and behavior of menu
+	]],
 }
 
 return strings, "english"
