@@ -322,7 +322,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 		function selector:Paint(w, h)
 			if self:IsHovered() and not self.washovered then
 				self.washovered = true
-				surface.PlaySound("gwater2/menu/rollover.wav")
+				if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/rollover.wav", 75, 100, 1, CHAN_STATIC) end
 			elseif not self:IsHovered() and self.washovered then
 				self.washovered = false
 			end
@@ -336,7 +336,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
             styling.draw_main_background(0, 0, w, h)
         end
 		function selector:DoClick()
-			surface.PlaySound("gwater2/menu/confirm.wav")
+			if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/confirm.wav", 75, 100, 1, CHAN_STATIC) end
 			for k,v in pairs(v) do
 				local section = k:sub(0, 4)
 				local name = k:sub(6)
@@ -365,7 +365,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 			end
 		end
 		function selector:DoRightClick()
-			surface.PlaySound("gwater2/menu/confirm.wav")
+			if gwater2.options.read_config().sounds then  LocalPlayer():EmitSound("gwater2/menu/confirm.wav", 75, 100, 1, CHAN_STATIC) end
 			local menu = DermaMenu()
 			local clip = menu:AddSubMenu(_util.get_localised("Presets.copy"))
 			clip:AddOption(_util.get_localised("Presets.copy.as_b64pi"), function()
@@ -405,7 +405,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 		function import_preset:Paint(w, h)
 			if self:IsHovered() and not self.washovered then
 				self.washovered = true
-				surface.PlaySound("gwater2/menu/rollover.wav")
+				if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/rollover.wav", 75, 100, 1, CHAN_STATIC) end
 			elseif not self:IsHovered() and self.washovered then
 				self.washovered = false
 			end
@@ -453,7 +453,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 				file.Write("gwater2/presets.txt", util.TableToJSON(presets))
 				mk_save_btn()
 				frame:Close()
-				surface.PlaySound("gwater2/menu/select_ok.wav")
+				if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/select_ok.wav", 75, 100, 1, CHAN_STATIC) end
 			end
 
 			function textarea:OnChange()
@@ -474,10 +474,10 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 			deny.Paint = nil
 			function deny:DoClick()
 				frame:Close()
-				surface.PlaySound("gwater2/menu/select_deny.wav")
+				if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/select_deny.wav", 75, 100, 1, CHAN_STATIC) end
 			end
 
-			surface.PlaySound("gwater2/menu/confirm.wav")
+			if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/confirm.wav", 75, 100, 1, CHAN_STATIC) end
 		end
 		local save = local_presets:Add("DButton")
 		save:Dock(TOP)
@@ -485,7 +485,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 		function save:Paint(w, h)
 			if self:IsHovered() and not self.washovered then
 				self.washovered = true
-				surface.PlaySound("gwater2/menu/rollover.wav")
+				if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/rollover.wav", 75, 100, 1, CHAN_STATIC) end
 			elseif not self:IsHovered() and self.washovered then
 				self.washovered = false
 			end
@@ -585,7 +585,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 				file.Write("gwater2/presets.txt", util.TableToJSON(presets))
 				mk_save_btn()
 				frame:Close()
-				surface.PlaySound("gwater2/menu/select_ok.wav")
+				if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/select_ok.wav", 75, 100, 1, CHAN_STATIC) end
 			end
 
 			local deny = vgui.Create("DButton", frame)
@@ -596,10 +596,10 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 			deny.Paint = nil
 			function deny:DoClick()
 				frame:Close()
-				surface.PlaySound("gwater2/menu/select_deny.wav")
+				if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/select_deny.wav", 75, 100, 1, CHAN_STATIC) end
 			end
 
-			surface.PlaySound("gwater2/menu/confirm.wav")
+			if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/confirm.wav", 75, 100, 1, CHAN_STATIC) end
 		end
 
 		local_presets:SetTall(local_presets:GetChildren()[1]:GetTall() * #local_presets:GetChildren())

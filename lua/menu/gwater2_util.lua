@@ -8,6 +8,22 @@ local function get_localised(loc, ...)
 	return language.GetPhrase("gwater2.menu."..loc):gsub("^%s+", ""):format(...)
 end
 
+local function is_hovered_any(panel)
+	if panel:IsHovered() then return true end
+	for k,v in pairs(panel:GetChildren()) do
+		if v.IsEditing and v:IsEditing() then
+			return true
+		end
+		if v.IsDown and v:IsDown() then
+			return true
+		end
+		if is_hovered_any(v) then
+			return true
+		end
+	end
+	return false
+end
+
 local function set_gwater_parameter(option, val)
 	-- nondirect options (eg. parameter scales based on radius)
 	if gwater2.options.parameters[option].defined then
@@ -74,7 +90,7 @@ local function make_title_label(tab, txt)
 			label.washovered = true
 			gwater2.cursor_busy = label
 			tab.help_text:SetText(txt)
-			surface.PlaySound("gwater2/menu/rollover.wav")
+			if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/rollover.wav", 75, 100, 1, CHAN_STATIC) end
 			label:SetColor(Color(187, 245, 255))
 		elseif not label:IsHovered() and label.washovered then
 			gwater2.cursor_busy = nil
@@ -124,7 +140,7 @@ local function make_parameter_scratch(tab, locale_parameter_name, parameter_name
 	if parameter.setup then parameter.setup(slider) end
 	function button:DoClick()
 		slider:SetValue(gwater2.options.parameters[string.lower(parameter_name):gsub(" ", "_")].default)
-		surface.PlaySound("gwater2/menu/reset.wav")
+		if gwater2.options.read_config().sounds then  LocalPlayer():EmitSound("gwater2/menu/reset.wav", 75, 100, 1, CHAN_STATIC) end
 	end
 	function slider:OnValueChanged(val)
 		if parameter.decimals == 0 and val ~= math.Round(val, parameter.decimals) then
@@ -138,20 +154,13 @@ local function make_parameter_scratch(tab, locale_parameter_name, parameter_name
 	local defhelptext = nil
 	function panel:Paint()
 		if gwater2.cursor_busy ~= panel and gwater2.cursor_busy ~= nil and IsValid(gwater2.cursor_busy) then return end
-		local hovered = panel:IsHovered()
-		if not hovered then
-			for k,v in pairs(panel:GetChildren()) do
-				if v:IsHovered() then hovered = true break end
-				if v.IsEditing and v:IsEditing() then hovered = true break end
-				if v.IsDown and v:IsDown() then hovered = true break end
-			end
-		end
+		local hovered = is_hovered_any(panel)
 		if hovered and not panel.washovered then
 			defhelptext = tab.help_text:GetText()
 			panel.washovered = true
 			gwater2.cursor_busy = panel
 			tab.help_text:SetText(get_localised(locale_parameter_name..".desc"))
-			surface.PlaySound("gwater2/menu/rollover.wav")
+			if gwater2.options.read_config().sounds then  LocalPlayer():EmitSound("gwater2/menu/rollover.wav", 75, 100, 1, CHAN_STATIC) end
 			label:SetColor(Color(187, 245, 255))
 		elseif not hovered and panel.washovered then
 			panel.washovered = false
@@ -200,7 +209,7 @@ local function make_parameter_color(tab, locale_parameter_name, parameter_name, 
 	panel.label = label
 	function button:DoClick()
 		mixer:SetColor(gwater2.options.parameters.color.default)
-		surface.PlaySound("gwater2/menu/reset.wav")
+		if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/reset.wav", 75, 100, 1, CHAN_STATIC) end
 	end
 	function mixer:ValueChanged(col)
 		gwater2.options.parameters.color.real = Color(col.r, col.g, col.b, col.a)
@@ -209,20 +218,13 @@ local function make_parameter_color(tab, locale_parameter_name, parameter_name, 
 	local defhelptext = nil
 	function panel:Paint()
 		if gwater2.cursor_busy ~= panel and gwater2.cursor_busy ~= nil and IsValid(gwater2.cursor_busy) then return end
-		local hovered = panel:IsHovered()
-		if not hovered then
-			for k,v in pairs(panel:GetChildren()) do
-				if v:IsHovered() then hovered = true break end
-				if v.IsEditing and v:IsEditing() then hovered = true break end
-				if v.IsDown and v:IsDown() then hovered = true break end
-			end
-		end
+		local hovered = is_hovered_any(panel)
 		if hovered and not panel.washovered then
 			defhelptext = tab.help_text:GetText()
 			panel.washovered = true
 			gwater2.cursor_busy = panel
 			tab.help_text:SetText(get_localised(locale_parameter_name..".desc"))
-			surface.PlaySound("gwater2/menu/rollover.wav")
+			if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/rollover.wav", 75, 100, 1, CHAN_STATIC) end
 			label:SetColor(Color(187, 245, 255))
 		elseif not hovered and panel.washovered then
 			panel.washovered = false
@@ -266,9 +268,10 @@ local function make_parameter_check(tab, locale_parameter_name, parameter_name, 
 	if parameter.setup then parameter.setup(check) end
 	function button:DoClick()
 		check:SetValue(gwater2.options.parameters[string.lower(parameter_name):gsub(" ", "_")].default)
-		surface.PlaySound("gwater2/menu/reset.wav")
+		if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/reset.wav", 75, 100, 1, CHAN_STATIC) end
 	end
 	function check:OnChange(val)
+		if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/toggle.wav", 75, 100, 1, CHAN_STATIC) end
 		gwater2.options.parameters[string.lower(parameter_name):gsub(" ", "_")].real = val
 		if parameter.func then if parameter.func(val) then return end end
 		set_gwater_parameter(string.lower(parameter_name):gsub(" ", "_"), val)
@@ -276,20 +279,13 @@ local function make_parameter_check(tab, locale_parameter_name, parameter_name, 
 	local defhelptext = nil
 	function panel:Paint()
 		if gwater2.cursor_busy ~= panel and gwater2.cursor_busy ~= nil and IsValid(gwater2.cursor_busy) then return end
-		local hovered = panel:IsHovered()
-		if not hovered then
-			for k,v in pairs(panel:GetChildren()) do
-				if v:IsHovered() then hovered = true break end
-				if v.IsEditing and v:IsEditing() then hovered = true break end
-				if v.IsDown and v:IsDown() then hovered = true break end
-			end
-		end
+		local hovered = is_hovered_any(panel)
 		if hovered and not panel.washovered then
 			defhelptext = tab.help_text:GetText()
 			panel.washovered = true
 			gwater2.cursor_busy = panel
 			tab.help_text:SetText(get_localised(locale_parameter_name..".desc"))
-			surface.PlaySound("gwater2/menu/rollover.wav")
+			if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/rollover.wav", 75, 100, 1, CHAN_STATIC) end
 			label:SetColor(Color(187, 245, 255))
 		elseif not hovered and panel.washovered then
 			panel.washovered = false

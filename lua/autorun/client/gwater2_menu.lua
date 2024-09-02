@@ -14,6 +14,23 @@ gwater2.options = gwater2.options or {
 	depth_fix = CreateClientConVar("gwater2_depth_fix", "0", true),
 	menu_key = CreateClientConVar("gwater2_menu2key", KEY_G, true),
 	menu_tab = CreateClientConVar("gwater2_menu2tab", "1", true),
+
+	config_bitflag = CreateConVar("gwater2_menu2cfg", "1", FCVAR_ARCHIVE + FCVAR_UNREGISTERED, "don't"),
+	write_config = function(tbl)
+		local real = gwater2.options.read_config()
+		if tbl.sounds == nil then tbl.sounds = real.sounds end
+		gwater2.options.config_bitflag:SetInt(
+			(tbl.sounds and 1 or 0) * 1
+		)
+	end,
+	read_config = function()
+		local bitflag = gwater2.options.config_bitflag:GetInt()
+		local sounds = bit.band(bitflag, 1) == 1
+		return {
+			["sounds"]=sounds
+		}
+	end,
+
 	parameters = {
 		color = {real=Color(209, 237, 255, 25), default=Color(209, 237, 255, 25)},
 		color_value_multiplier = {real=1, default=1, val=1, func=function()
@@ -179,7 +196,7 @@ local function create_menu()
 	reset:SetPos(sim_preview:GetWide() - reset:GetWide() - 5, 5)
 	function reset:DoClick()
 		gwater2.options.solver:Reset()
-		surface.PlaySound("gwater2/menu/reset.wav")
+		if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/reset.wav", 75, 100, 1, CHAN_STATIC) end
 	end
 
 	help_text:SetSize(frame:GetWide()*0.25, help_text:GetTall())
@@ -309,8 +326,15 @@ local function create_menu()
 		end
 
 		util.make_parameter_check(tab, "Menu.sounds", "Sounds", {
-	        func=function(val) return true end,
-	        setup=function(check) return true end
+	        func=function(val)
+	        	gwater2.options.write_config({["sounds"]=val})
+	        	return true
+	        end,
+	        setup=function(check)
+	        	check:GetParent().button:Remove()
+	        	check:SetValue(gwater2.options.read_config().sounds)
+	        	return true
+	        end
     	})
 	end
 
@@ -347,7 +371,6 @@ local function create_menu()
 	end
 
 	tabs:SetActiveTab(tabs.Items[gwater2.options.menu_tab:GetInt() ~= 1 and 1 or 2].Tab)
-	local last_change_sound = ""
 	function tabs:OnActiveTabChanged(_, new)
 		help_text:SetText(util.get_localised(new.realname..".help"))
 		for k, v in ipairs(self.Items) do
@@ -356,12 +379,7 @@ local function create_menu()
 				break
 			end
 		end
-		local now_change_sound = last_change_sound
-		while now_change_sound == last_change_sound do
-			now_change_sound = "gwater2/menu/select/select_"..math.random(0, 14)..".mp3"
-		end
-		surface.PlaySound(now_change_sound)
-		last_change_sound = now_change_sound
+		if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/select.wav", 75, 100, 1, CHAN_STATIC) end
 		new.lastpush = RealTime()
 		help_text:GetParent():SetParent(new:GetPanel())
 		help_text:GetParent():Dock(RIGHT)

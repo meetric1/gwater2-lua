@@ -10,174 +10,132 @@ local parameters = {
 	["001-Physics Parameters"] = {
 		["list"] = {
 			["001-Adhesion"] = {
-				desc="Controls how well particles stick to surfaces.\n\n"..
-					 "Note that this specific parameter doesn't reflect changes in the preview very well and may need to be viewed externally.",
 				min=0,
 				max=0.2,
 				decimals=3,
 				type="scratch"
 			},
 			["002-Cohesion"] = {
-				desc="Controls how well particles hold together.\n\n"..
-					 "Higher values make the fluid more solid/rigid, while lower values make it more fluid and loose.",
 				min=0,
 				max=2,
 				decimals=3,
 				type="scratch"
 			},
 			["003-Radius"] = {
-				desc="Controls the size of each particle.\n\n"..
-					 "In the preview it is clamped to 15 to avoid weirdness.\n\n"..
-					 "Radius is measured in source units and is the same for all particles.",
 				min=1,
 				max=100,
 				decimals=1,
 				type="scratch"
 			},
 			["004-Gravity"] = {
-				desc="Controls how strongly fluid is pulled down. This value is measured in meters per second.\n\n"..
-					 "Note that the default source gravity is -15.24 which is NOT the same as Earths gravity of -9.81.",
 				min=-30.48,
 				max=30.48,
 				decimals=2,
 				type="scratch"
 			},
 			["005-Viscosity"] = {
-				desc="Controls how much particles resist movement.\n\n"..
-					 "Higher values look more like honey or syrup, while lower values look like water or oil.",
 				min=0,
 				max=20,
 				decimals=2,
 				type="scratch"
 			},
 			["006-Surface Tension"] = {
-				desc="Controls how strongly particles minimize surface area.\n\n"..
-					 "This parameter tends to make particles behave oddly if set too high\n\nUsually bundled with cohesion.",
 				min=0,
 				max=1,
 				decimals=2,
 				type="scratch"
 			},
 			["007-Timescale"] = {
-				desc="Sets the speed of the simulation.\n\n"..
-					 "Note that some parameters like cohesion and surface tension may behave differently due to smaller or larger compute times",
 				min=0,
 				max=2,
 				decimals=2,
 				type="scratch"
 			}
-		},
-		["desc"] = "Parameters that directly influence physics interactions with water."
+		}
 	},
 	["002-Advanced Physics Parameters"] = {
 		["list"] = {
 			["001-Collision Distance"] = {
-				desc="Controls the collision distance between particles and objects.\n\n"..
-					 "Note that a lower collision distance will cause particles to clip through objects more often.",
 				min=0.1,
 				max=1,
 				decimals=2,
 				type="scratch"
 			},
 			["002-Fluid Rest Distance"] = {
-				desc="Controls the collision distance between particles.\n\n"..
-					 "Higher values cause more lumpy liquids while lower values cause smoother liquids",
 				min=0.55,
 				max=0.85,
 				decimals=2,
 				type="scratch"
 			},
 			["003-Dynamic Friction"] = {
-				desc="Controls the amount of friction particles receive on surfaces.\n\n"..
-					 "Causes Adhesion to behave weirdly when set to 0.",
 				min=0,
 				max=1,
 				decimals=2,
 				type="scratch"
 			},
 			["004-Vorticity Confinement"] = {
-				desc="Increases the vorticity effect by applying rotational forces to particles.\n\n"..
-					 "This exists because air pressure cannot be efficiently simulated.",
 				min=0,
 				max=200,
 				decimals=0,
 				type="scratch"
 			}
-		},
-		["desc"] = "More technical settings."
+		}
 	},
 	["003-Reaction Force Parameters"] = {
 		["list"] = {
 			["001-Force Multiplier"] = {
-				desc="Determines the amount of force which is applied to props by water.",
 				min=0.001,
 				max=0.02,
 				decimals=3,
 				type="scratch"
 			},
 			["002-Force Buoyancy"] = {
-				desc="Buoyant force which is applied to props in water.\n\n"..
-					 "The implementation is by no means accurate and probably should not be used for prop boats.",
 				min=0,
 				max=500,
 				decimals=1,
 				type="scratch"
 			},
 			["003-Force Dampening"] = {
-				desc="Dampening force applied to props.\n\n"..
-					 "Helps a little bit if props tend to bounce on the water surface.",
 				min=0,
 				max=1,
 				decimals=2,
 				type="scratch"
 			}
-		},
-		["desc"] = "'Reaction Forces' (in performance tab) must be set to 2 for these to work!"
+		}
 	}
 }
 local visuals = {
 	["001-Diffuse Threshold"] = {
-		desc="Controls the amount of force required to make a bubble/foam particle.",
 		min=1,
 		max=500,
 		decimals=1,
 		type="scratch"
 	},
 	["002-Diffuse Lifetime"] = {
-		desc="Controls how long bubbles/foam particles last after being created.\n\n"..
-			 "This is affected by the Timescale parameter.\n\n"..
-			 "Setting this to zero will spawn no diffuse particles",
 		min=0,
 		max=20,
 		decimals=1,
 		type="scratch"
 	},
 	["003-Anisotropy Scale"] = {
-		desc="Controls the visual size of stretching between particles.\n\n"..
-			 "Making this value zero will turn off stretching.",
 		min=0,
 		max=2,
 		decimals=2,
 		type="scratch"
 	},
 	["004-Anisotropy Min"] = {
-		desc="Controls the minimum visual size that particles can be.",
 		min=-0.1,
 		max=1,
 		decimals=2,
 		type="scratch"
 	},
 	["005-Anisotropy Max"] = {
-		desc="Controls the maximum visual size that particles are allowed to stretch between particles.",
 		min=0,
 		max=2,
 		decimals=2,
 		type="scratch"
 	},
 	["006-Color"] = {
-		desc="Controls the color of the fluid.\n\n"..
-			 "The alpha (transparency) channel controls the amount of color absorbsion.\n\n"..
-			 "An alpha value of 255 (maxxed) makes the fluid opaque.",
 		type="color",
 		func=function(col)
 			local finalpass = Material("gwater2/finalpass")
@@ -190,7 +148,6 @@ local visuals = {
 		end
 	},
 	["007-Color Value Multiplier"] = {
-		desc="Controls the multiplier of color of the fluid.",
 		type="scratch",
 		min=-3,
 		max=3,
@@ -200,7 +157,6 @@ local visuals = {
 		end
 	},
 	["008-Reflectance"] = {
-		desc="Defines how reflective water is.",
 		type="scratch",
 		min=-16,
 		max=16,
@@ -209,30 +165,27 @@ local visuals = {
 			local finalpass = Material("gwater2/finalpass")
 			finalpass:SetFloat("$reflectance", val)
 			return true
+		end,
+		setup=function(slider)
+			local finalpass = Material("gwater2/finalpass")
+			slider:SetValue(finalpass:GetFloat("$reflectance"))
 		end
 	}
 }
 local performance = {
 	["001-Iterations"] = {
-		desc="Controls how many times the physics solver attempts to converge to a solution per substep.\n\n"..
-			 "Medium performance impact.",
 		min=1,
 		max=10,
 		decimals=0,
 		type="scratch"
 	},
 	["002-Substeps"] = {
-		desc="Controls the number of physics steps done per tick.\n\n"..
-			 "Note that parameters may not be properly tuned for different substeps!\n\n"..
-			 "Medium-High performance impact.",
 		min=1,
 		max=10,
 		decimals=0,
 		type="scratch"
 	},
 	["003-Blur Passes"] = {
-		desc="Controls the number of blur passes done per frame. More passes creates a smoother water surface. Zero passes will do no blurring.\n\n"..
-			 "Low performance impact.",
 		min=0,
 		max=4,
 		decimals=0,
@@ -245,9 +198,6 @@ local performance = {
 		end
 	},
 	["004-Particle Limit"] = {
-		desc="USE THIS PARAMETER AT YOUR OWN RISK.\n\n"..
-			 "Changes the limit of particles.\n\n"..
-			 "Note that a higher limit will negatively impact performance even with the same number of particles spawned.",
 		min=1,
 		max=1000000,
 		decimals=0,
@@ -321,18 +271,12 @@ local performance = {
 		end
 	},
 	["005-Reaction Forces"] = {
-		desc="0 = No reaction forces\n\n"..
-			 "1 = Simple reaction forces. (Swimming)\n\n"..
-			 "2 = Full reaction forces (Water can move props).",
 		min=0,
 		max=2,
 		decimals=0,
 		type="scratch"
 	},
 	["006-Absorption"] = {
-		desc="Enables absorption of light over distance inside of fluid.\n\n"..
-			 "(more depth = darker color)\n\n"..
-			 "Medium performance impact.",
 		type="check",
 		func=function(val)
 			local water_volumetric = Material("gwater2/volumetric")
@@ -345,9 +289,6 @@ local performance = {
 		end
 	},
 	["007-Depth Fix"] = {
-		desc="Makes particles appear spherical instead of flat, creating a cleaner and smoother water surface.\n\n"..
-			 "Causes shader overdraw.\n\n"..
-			 "Medium-High performance impact.",
 		type="check",
 		func=function(val)
 			local water_normals = Material("gwater2/normals")
@@ -362,7 +303,6 @@ local performance = {
 }
 local interaction = {
     ["001-SwimSpeed"] = {
-        desc="",
         type="scratch",
         min=-20,
         max=100,
@@ -371,7 +311,6 @@ local interaction = {
         setup=function(scratch) end
     },
     ["002-SwimFriction"] = {
-        desc="",
         type="scratch",
         min=0,
         max=100,
@@ -380,7 +319,6 @@ local interaction = {
         setup=function(scratch) end
     },
     ["003-SwimBuoyancy"] = {
-        desc="",
         type="scratch",
         min=-2,
         max=2,
@@ -389,7 +327,6 @@ local interaction = {
         setup=function(scratch) end
     },
     ["004-DrownTime"] = {
-        desc="",
         type="scratch",
         min=0,
         max=100,
@@ -398,7 +335,6 @@ local interaction = {
         setup=function(scratch) end
     },
     ["005-DrownParticles"] = {
-        desc="",
         type="scratch",
         min=0,
         max=200,
@@ -407,7 +343,6 @@ local interaction = {
         setup=function(scratch) end
     },
     ["006-DrownDamage"] = {
-        desc="",
         type="scratch",
         min=0,
         max=5,
@@ -416,7 +351,6 @@ local interaction = {
         setup=function(scratch) end
     },
     ["007-MultiplyParticles"] = {
-        desc="",
         type="scratch",
         min=0,
         max=200,
@@ -425,7 +359,6 @@ local interaction = {
         setup=function(scratch) end
     },
     ["008-MultiplyWalk"] = {
-        desc="",
         type="scratch",
         min=0,
         max=2,
@@ -434,7 +367,6 @@ local interaction = {
         setup=function(scratch) end
     },
     ["009-MultiplyJump"] = {
-        desc="",
         type="scratch",
         min=0,
         max=2,
@@ -443,7 +375,6 @@ local interaction = {
         setup=function(scratch) end
     },
     ["010-TouchDamage"] = {
-        desc="",
         type="scratch",
         min=-200,
         max=200,
