@@ -5,6 +5,7 @@ if SERVER or not gwater2 then return end
 if gwater2.__PARAMS__ then return gwater2.__PARAMS__ end
 
 local styling = include("menu/gwater2_styling.lua")
+local _util = include("menu/gwater2_util.lua")
 
 local parameters = {
 	["001-Physics Parameters"] = {
@@ -42,6 +43,12 @@ local parameters = {
 			["006-Surface Tension"] = {
 				min=0,
 				max=1,
+				decimals=2,
+				type="scratch"
+			},
+			["007-Timescale"] = {
+				min=0,
+				max=2,
 				decimals=2,
 				type="scratch"
 			},
@@ -174,6 +181,7 @@ local visuals = {
 	}
 }
 local performance = {
+
 	["001-Iterations"] = {
 		min=1,
 		max=10,
@@ -215,34 +223,76 @@ local performance = {
 			button.Paint = nil
 			panel.button_apply = button
 			function button:DoClick()
-				local mainFrame = panel:GetParent():GetParent():GetParent():GetParent():GetParent()
-				local frame = styling.create_blocking_frame(mainFrame)
+				local frame = styling.create_blocking_frame()
+				frame:SetSize(ScrW() / 2, ScrH() / 2)
+				frame:Center()
 				function frame:Paint(w, h)
 					styling.draw_main_background(0, 0, w, h)
-
-					-- from testing it seems each particle is around 0.8kb so you could probably do some math to figure out the memory required and show it here
-		
-					local size_fmt = 0.8*slider:GetValue() * 1024
-				    local u = ""
-				    for _,unit in pairs({"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"}) do
-				    	u = unit
-				    	if math.abs(size_fmt) < 1024.0 then
-				    		break
-				    	end
-				    	size_fmt = size_fmt / 1024.0
-				    end
-				    size_fmt = string.format("%.2f", size_fmt)
-				    size_fmt = size_fmt..u.."B"
-
-					draw.DrawText("You are about to change the particle limit to \n" .. math.floor(slider:GetValue()) .. " ("..size_fmt..") .\nAre you sure?", "GWater2Title", 200, 30, color_white, TEXT_ALIGN_CENTER)
-					draw.DrawText("This can be dangerous, because all particles must be allocated on the GPU.\n"..
-								  "DO NOT set the limit to a number higher then you think your computer can handle.\n"..
-								  "I DO NOT take responsiblity for any damage to your computer this may cause.",
-								  "DermaDefault", 200, 110, color_white, TEXT_ALIGN_CENTER)
 				end
 
-				local confirm = vgui.Create("DButton", frame)
-				confirm:SetPos(260, 160)
+				-- from testing it seems each particle is around 0.8kb so you could probably do some math to figure out the memory required and show it here
+				local size_fmt = 0.8*slider:GetValue() * 1024
+			    local u = ""
+			    for _,unit in pairs({"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"}) do
+			    	u = unit
+			    	if math.abs(size_fmt) < 1024.0 then
+			    		break
+			    	end
+			    	size_fmt = size_fmt / 1024.0
+			    end
+			    size_fmt = string.format("%.2f", size_fmt)
+			    size_fmt = size_fmt..u.."B"
+
+			    local wrnpnl = frame:Add("DPanel")
+				wrnpnl:Dock(TOP)
+				function wrnpnl:Paint(w, h)
+					local r = (math.sin(RealTime() * 2) + 1) * 255 / 2
+					local s = 40
+					surface.SetDrawColor(r, 0, 0, r)
+					draw.NoTexture()
+					for x=-s*2,w+s,s do
+						x = x + ((RealTime() * 20) % s)
+						surface.DrawPoly({
+							{x=x, y=0}, {x=x+s/2, y=0}, {x=x+s, y=h}, {x=x+s/2, y=h}, 
+						})
+					end
+					surface.SetDrawColor(255-r, 0, 0, 255-r)
+					for x=-s/2-s,w-s/2+s,s do
+						x = x + ((RealTime() * 20) % s)
+						surface.DrawPoly({
+							{x=x, y=0}, {x=x+s/2, y=0}, {x=x+s, y=h}, {x=x+s/2, y=h}, 
+						})
+					end
+				end
+
+				local label = frame:Add("DLabel")
+				label:Dock(TOP)
+				label:SetText(_util.get_localised("Performance.Particle Limit.title", math.floor(slider:GetValue()), size_fmt))
+				label:SetFont("GWater2Title")
+				label:SizeToContentsY()
+				label.text = label:GetText()
+				label:SetText("")
+				function label:Paint() draw.DrawText(self.text, self:GetFont(), self:GetWide() / 2, 0, color_white, TEXT_ALIGN_CENTER) end
+
+				local label2 = frame:Add("DLabel")
+				label2:Dock(TOP)
+				label2:SetText(_util.get_localised("Performance.Particle Limit.warning"))
+				label2:SetFont("DermaDefault")
+				label2:SizeToContentsY()
+				label2.text = label2:GetText()
+				label2:SetText("")
+				function label2:Paint() draw.DrawText(self.text, self:GetFont(), self:GetWide() / 2, 0, color_white, TEXT_ALIGN_CENTER) end
+
+				local btnpanel = frame:Add("DPanel")
+				btnpanel:Dock(BOTTOM)
+				function btnpanel:Paint() end
+
+				local wrnpnl2 = frame:Add("DPanel")
+				wrnpnl2:Dock(BOTTOM)
+				wrnpnl2.Paint = wrnpnl.Paint
+
+				local confirm = vgui.Create("DButton", btnpanel)
+				confirm:Dock(RIGHT)
 				confirm:SetText("")
 				confirm:SetSize(20, 20)
 				confirm:SetImage("icon16/accept.png")
@@ -255,8 +305,8 @@ local performance = {
 					surface.PlaySound("gwater2/menu/select_ok.wav")
 				end
 
-				local deny = vgui.Create("DButton", frame)
-				deny:SetPos(110, 160)
+				local deny = vgui.Create("DButton", btnpanel)
+				deny:Dock(LEFT)
 				deny:SetText("")
 				deny:SetSize(20, 20)
 				deny:SetImage("icon16/cross.png")
@@ -265,7 +315,6 @@ local performance = {
 					frame:Close()
 					surface.PlaySound("gwater2/menu/select_deny.wav")
 				end
-				input.SetCursorPos(frame:GetX()+120, frame:GetY()+170)
 
 				surface.PlaySound("gwater2/menu/confirm.wav")
 			end

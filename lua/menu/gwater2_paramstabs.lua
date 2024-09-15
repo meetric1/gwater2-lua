@@ -189,6 +189,8 @@ local function interaction_tab(tabs)
 	pan:InvalidateChildren()
 	pan:DockMargin(5, 5, 5, 5)
 	pan:DockPadding(5, 5, 5, 5)
+
+	return params, tab
 end
 
 return {

@@ -45,16 +45,16 @@ gwater2.options = gwater2.options or {
 			col.a = col.a * gwater2.options.parameters.color_value_multiplier.real
 			finalpass:SetVector4D("$color2", col:Unpack())
 		end, defined=true},
-		swimfriction = {real=1, default=1, val=1, defined=true},
-		swimspeed = {real=2, default=2, val=2, defined=true},
-		swimbuoyancy = {real=0.5, default=0.5, val=0.5, defined=true},
-		drowntime = {real=4, default=4, val=4, defined=true},
-		drowndamage = {real=0.25, default=0.25, val=0.25, defined=true},
-		drownparticles = {real=60, default=60, val=60, defined=true},
-		multiplyparticles = {real=60, default=60, val=60, defined=true},
-		multiplywalk = {real=1, default=1, val=1, defined=true},
-		multiplyjump = {real=1, default=1, val=1, defined=true},
-		touchdamage = {real=0, default=0, val=0, defined=true}
+		swimfriction = {real=1, default=1, val=1, defined=true, func=function() end},
+		swimspeed = {real=2, default=2, val=2, defined=true, func=function() end},
+		swimbuoyancy = {real=0.5, default=0.5, val=0.5, defined=true, func=function() end},
+		drowntime = {real=4, default=4, val=4, defined=true, func=function() end},
+		drowndamage = {real=0.25, default=0.25, val=0.25, defined=true, func=function() end},
+		drownparticles = {real=60, default=60, val=60, defined=true, func=function() end},
+		multiplyparticles = {real=60, default=60, val=60, defined=true, func=function() end},
+		multiplywalk = {real=1, default=1, val=1, defined=true, func=function() end},
+		multiplyjump = {real=1, default=1, val=1, defined=true, func=function() end},
+		touchdamage = {real=0, default=0, val=0, defined=true, func=function() end}
 	}
 }
 
@@ -143,12 +143,8 @@ local function create_menu()
 	divider:SetLeftWidth(sim_preview:GetWide())
 	divider:SetLeftMin(20)
 
-	local particle_material = CreateMaterial("gwater2_menu_material", "UnlitGeneric", {
-		["$basetexture"] = "vgui/circle",
-		["$vertexcolor"] = 1,
-		["$vertexalpha"] = 1,
-		["$ignorez"] = 1
-	})
+	local particle_material = nil
+	local pixelated = "hell"
 	function sim_preview:Paint(w, h)
 		styling.draw_main_background(0, 0, w, h)
 		local x, y = sim_preview:LocalToScreen()
@@ -167,13 +163,29 @@ local function create_menu()
 		gwater2.options.solver:AddCube(mat, Vector(4, 1, 1), {vel = Vector(0, 0, 50)})
 		gwater2.options.solver:Tick(1 / 60)
 
+		if gwater2.options.read_config().pixelate_preview ~= pixelated then
+			pixelated = gwater2.options.read_config().pixelate_preview
+			particle_material = CreateMaterial("gwater2_menu_material"..(gwater2.options.read_config().pixelate_preview and "_pix" or ""), "UnlitGeneric", {
+				["$basetexture"] = (gwater2.options.read_config().pixelate_preview and "color/white" or "vgui/circle"),
+				["$vertexcolor"] = 1,
+				["$vertexalpha"] = 1,
+				["$ignorez"] = 1
+			})
+		end
+
 		gwater2.options.solverd.average_fps = gwater2.options.solverd.average_fps + (RealFrameTime() - gwater2.options.solverd.average_fps) * 0.01
 		surface.SetMaterial(particle_material)
 		gwater2.options.solver:RenderParticles(function(pos)
 			local depth = math.max((pos[3] - y) / 390, 0) * 20	-- ranges from 0 to 20 down
 			local absorption = is_translucent and exp((gwater2.options.parameters.color.real:ToVector() * gwater2.options.parameters.color_value_multiplier.real - Vector(1, 1, 1)) * gwater2.options.parameters.color.real.a / 255 * depth) or (gwater2.options.parameters.color.real:ToVector() * gwater2.options.parameters.color_value_multiplier.real)
-			surface.SetDrawColor(absorption[1] * 255, absorption[2] * 255, absorption[3] * 255, 255)
-			surface.DrawTexturedRect(pos[1] - x, pos[3] - y, radius, radius)
+			surface.SetDrawColor(absorption[1] * 255, absorption[2] * 255, absorption[3] * 255, 63)
+			local px = pos[1] - x
+			local py = pos[3] - y
+			if gwater2.options.read_config().pixelate_preview then
+				px = math.floor(px / radius) * radius
+				py = math.floor(py / radius) * radius
+			end
+			surface.DrawTexturedRect(px, py, radius, radius)
 		end)
 
 		styling.draw_main_background(0, 0, sim_preview:GetWide(), 30)
@@ -223,6 +235,8 @@ local function create_menu()
 			just_closed = true
 		end
 	end
+
+	frame.tabs = tabs
 
 	hook.Run("GWater2MenuPreInitialize", frame, params.parameters, params.visuals, params.performance, params.interaction)
 
@@ -378,6 +392,18 @@ local function create_menu()
 	        	return true
 	        end
     	})
+
+    	util.make_parameter_check(tab, "Menu.pixelate_preview", "Pixelate Preview", {
+	        func=function(val)
+	        	gwater2.options.write_config({["pixelate_preview"]=val})
+	        	return true
+	        end,
+	        setup=function(check)
+	        	check:GetParent().button:Remove()
+	        	check:SetValue(gwater2.options.read_config().pixelate_preview)
+	        	return true
+	        end
+    	})
 	end
 
 	tabs.help_text = help_text
@@ -514,12 +540,12 @@ hook.Add("PopulateToolMenu", "gwater2_menu2", function()
 end)
 
 -- hate this
-function OpenGW2Menu2(ply, key)
+function OpenGW2Menu(ply, key)
 	if key ~= gwater2.options.menu_key:GetInt() or just_closed == true then return end
 	RunConsoleCommand("gwater2_menu2")
 end
 
-function CloseGW2Menu2(ply, key)
+function CloseGW2Menu(ply, key)
 	if key ~= gwater2.options.menu_key:GetInt() then return end
 	just_closed = false
 end

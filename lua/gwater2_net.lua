@@ -6,6 +6,7 @@ if SERVER then
 	util.AddNetworkString("GWATER2_ADDCUBE")
 	util.AddNetworkString("GWATER2_ADDCYLINDER")
 	util.AddNetworkString("GWATER2_ADDSPHERE")
+	util.AddNetworkString("GWATER2_RESETSOLVER")
 
 	util.AddNetworkString("GWATER2_CHANGEPARAMETER")
 	util.AddNetworkString("GWATER2_REQUESTPARAMETERSSNAPSHOT")
@@ -70,6 +71,11 @@ if SERVER then
 			end
 		end,
 
+		ResetSolver = function()
+			net.Start("GWATER2_RESETSOLVER")
+			net.Broadcast()
+		end,
+
 		quick_matrix = function(pos, ang, scale)
 			local mat = Matrix()
 			if pos then mat:SetTranslation(pos) end
@@ -96,6 +102,10 @@ else	-- CLIENT
 	local util = include("menu/gwater2_util.lua")
 	net.Receive("GWATER2_CHANGEPARAMETER", function(len)
 		util.set_gwater_parameter(net.ReadString(), net.ReadType())
+	end)
+
+	net.Receive("GWATER2_RESETSOLVER", function(len)
+		gwater2.solver:Reset()
 	end)
 
 	net.Receive("GWATER2_ADDCLOTH", function(len)

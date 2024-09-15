@@ -1,3 +1,5 @@
+if CLIENT then return end
+
 local GWATER2_PARTICLES_TO_SWIM = 30
 
 -- swim code provided by kodya (with permission)
@@ -80,15 +82,15 @@ local function do_damage(ply)
 	end
 end
 
-local ticks, lasttick = 0, -1
+local ticks = 0
 hook.Add("Think", "gwater2_interactions", function()
 	ticks = ticks + 1
 end)
 
 hook.Add("Move", "gwater2_swimming", function(ply, move)
 	do_swim(ply, move)
-	if ticks ~= lasttick then
-		lasttick = ticks
+	if ticks ~= ply.gwater2_lasttick then
+		ply.gwater2_lasttick = ticks
 		do_drown(ply)
 		do_multiply(ply)
 		do_damage(ply)

@@ -250,7 +250,7 @@ local function make_parameter_color(tab, locale_parameter_name, parameter_name, 
 	if parameter.setup then parameter.setup(mixer) end
 	gwater2.options.initialised[string.lower(parameter_name):gsub(" ", "_")] = {parameter, mixer}
 	function button:DoClick()
-		slider:SetValue(gwater2.options.parameters[string.lower(parameter_name):gsub(" ", "_")].default)
+		mixer:SetColor(gwater2.options.parameters[string.lower(parameter_name):gsub(" ", "_")].default)
 		if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/reset.wav", 75, 100, 1, CHAN_STATIC) end
 	end
 	function mixer:ValueChanged(val)
@@ -281,7 +281,7 @@ local function make_parameter_color(tab, locale_parameter_name, parameter_name, 
 	end
 	panel:SetTall(panel:GetTall()+5)
 	if not gwater2.options.parameters[string.lower(parameter_name):gsub(" ", "_")] then
-		gwater2.options.parameters[string.lower(parameter_name):gsub(" ", "_")] = {real=slider:GetValue(), default=slider:GetValue()}
+		gwater2.options.parameters[string.lower(parameter_name):gsub(" ", "_")] = {real=mixer:GetValue(), default=mixer:GetValue()}
 	end
 	return panel
 end

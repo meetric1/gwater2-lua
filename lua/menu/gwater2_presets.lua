@@ -13,21 +13,14 @@ local _util = include("menu/gwater2_util.lua")
 local default_presets = {
 	["000-(Default) Water"]={
 		["CUST/Author"]="Meetric",
-		["VISL/Color"]=(2^31-1),
-		["PHYS/Cohesion"]=(2^31-1),
-		["PHYS/Adhesion"]=(2^31-1),
-		["PHYS/Viscosity"]=(2^31-1),
-		["PHYS/Surface Tension"]=(2^31-1),
-		["PHYS/Fluid Rest Distance"]=(2^31-1)
+		["CUST/Master Reset"]=true
 	},
 	["001-Acid"]={
 		["CUST/Author"]="Meetric",
 		["VISL/Color"]={240, 255, 0, 150},
-		["PHYS/Cohesion"]=(2^31-1),
 		["PHYS/Adhesion"]=0.1,
 		["PHYS/Viscosity"]=0,
-		["PHYS/Surface Tension"]=(2^31-1),
-		["PHYS/Fluid Rest Distance"]=(2^31-1)
+		["CUST/Master Reset"]=true
 	},
 	["002-Blood"]={
 		["CUST/Author"]="GHM",
@@ -36,7 +29,8 @@ local default_presets = {
 		["PHYS/Adhesion"]=0.15,
 		["PHYS/Viscosity"]=1,
 		["PHYS/Surface Tension"]=0,
-		["PHYS/Fluid Rest Distance"]=0.55
+		["PHYS/Fluid Rest Distance"]=0.55,
+		["CUST/Master Reset"]=true
 	},
 	["003-Glue"]={ -- yeah, sure... "glue"...
 		["CUST/Author"]="Meetric",
@@ -45,7 +39,7 @@ local default_presets = {
 		["PHYS/Adhesion"]=0.1,
 		["PHYS/Viscosity"]=10,
 		["PHYS/Surface Tension"]=(2^31-1),
-		["PHYS/Fluid Rest Distance"]=(2^31-1)
+		["CUST/Master Reset"]=true
 	},
 	["004-Lava"]={
 		["CUST/Author"]="Meetric",
@@ -53,8 +47,7 @@ local default_presets = {
 		["PHYS/Cohesion"]=0.1,
 		["PHYS/Adhesion"]=0.01,
 		["PHYS/Viscosity"]=10,
-		["PHYS/Surface Tension"]=(2^31-1),
-		["PHYS/Fluid Rest Distance"]=(2^31-1)
+		["CUST/Master Reset"]=true
 	},
 	["005-Oil"]={ -- SOMEONE SAID OIL?? *freedom sounds*
 		["CUST/Author"]="Meetric",
@@ -63,7 +56,7 @@ local default_presets = {
 		["PHYS/Adhesion"]=0,
 		["PHYS/Viscosity"]=0,
 		["PHYS/Surface Tension"]=0,
-		["PHYS/Fluid Rest Distance"]=(2^31-1)
+		["CUST/Master Reset"]=true
 	},
 	["006-Goop"]={
 		["CUST/Author"]="Meetric",
@@ -72,7 +65,7 @@ local default_presets = {
 		["PHYS/Adhesion"]=0.1,
 		["PHYS/Viscosity"]=10,
 		["PHYS/Surface Tension"]=0.25,
-		["PHYS/Fluid Rest Distance"]=(2^31-1)
+		["CUST/Master Reset"]=true
 	}
 }
 
@@ -80,15 +73,20 @@ function gwater2.options.detect_preset_type(preset)
 	if util.JSONToTable(preset) ~= nil then
 		return "JSON"
 	end
-	if util.Decompress(util.Base64Decode(preset)) ~= nil then
-		return "B64-PI"
+	if util.Decompress(util.Base64Decode(preset)) ~= "" and util.Decompress(util.Base64Decode(preset)) ~= nil then
+		if pcall(function() util.JSONToTable(util.Decompress(util.Base64Decode(preset))) end) then
+			return "B64-PI"
+		else
+			return nil
+		end
 	end
 
 
 	local preset_parts = preset:Split(',')
+	PrintTable(preset_parts)
 
 	if preset_parts[2] == '' and preset_parts[3] ~= nil then
-		if preset_parts[4] == '' then
+		if preset_parts[4] == '' and preset_parts[5] ~= nil and preset_parts[5] ~= '' then
 			return "Extension w/ Author"
 		end
 		if preset_parts[4] ~= nil then
@@ -96,7 +94,7 @@ function gwater2.options.detect_preset_type(preset)
 		end
 		return "Extension"
 	end
-	if preset_parts[2] ~= '' then
+	if preset_parts[2] ~= '' and preset_parts[2] ~= nil then
 		if preset_parts[3] ~= nil then
 			return nil
 		end
@@ -340,13 +338,52 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 			for k,v in pairs(v) do
 				local section = k:sub(0, 4)
 				local name = k:sub(6)
+				if section == "CUST" and name == "Master Reset" then
+					continue
+				end
 				if v == (2^31-1) then
 					v = gwater2.options.parameters[name:lower():gsub(" ", "_")].default
 				end
 
 				if section == "VISL" then
+					if _visuals[name].slider then
+						_visuals[name].slider:SetValue(v)
+					elseif _visuals[name].check then
+						_visuals[name].check:SetValue(v)
+					elseif _visuals[name].mixer then
+						_visuals[name].mixer:SetColor(Color(v[1], v[2], v[3], v[4]))
+					end
+				elseif section == "PHYS" then
+					if _parameters[name].slider then
+						_parameters[name].slider:SetValue(v)
+					elseif _parameters[name].check then
+						_parameters[name].check:SetValue(v)
+					elseif _parameters[name].mixer then
+						_parameters[name].mixer:SetColor(Color(v[1], v[2], v[3], v[4]))
+					end
+				elseif section == "PERF" then
+					if _performance[name].slider then
+						_performance[name].slider:SetValue(v)
+					elseif _performance[name].check then
+						_performance[name].check:SetValue(v)
+					elseif _performance[name].mixer then
+						_performance[name].mixer:SetColor(Color(v[1], v[2], v[3], v[4]))
+					end
+				elseif section == "INTR" then
+					if _interactions[name].slider then
+						_interactions[name].slider:SetValue(v)
+					elseif _interactions[name].check then
+						_interactions[name].check:SetValue(v)
+					elseif _interactions[name].mixer then
+						_interactions[name].mixer:SetColor(Color(v[1], v[2], v[3], v[4]))
+					end
+				else
+					print("!!!", section, name)
+				end
+
+				if section == "VISL" then
 					if name == "Color" then
-						if not v.r or not v.g or not v.g then
+						if not v.r or not v.g or not v.B then
 							v = Color(v[1], v[2], v[3], v[4] or 255)
 						end
 						_visuals[name].mixer:SetColor(v)
@@ -419,23 +456,33 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
             styling.draw_main_background(0, 0, w, h)
         end
         function import_preset:DoClick()
-			local frame = styling.create_blocking_frame(mainFrame)
+			local frame = styling.create_blocking_frame()
+			frame:SetSize(ScrW()/2, ScrH()/2)
+			frame:Center()
 			local label = frame:Add("DLabel")
 			label:Dock(TOP)
 			label:SetText(_util.get_localised("Presets.import.paste_here"))
 			label:SetFont("GWater2Title")
 			local textarea = frame:Add("DTextEntry")
-			textarea:Dock(TOP)
+			textarea:Dock(FILL)
 			textarea:SetFont("GWater2Param")
 			textarea:SetValue("")
+			textarea:SetMultiline(true)
+			textarea:SetVerticalScrollbarEnabled(true)
+			textarea:SetWrap(true)
+
+			local btnpanel = frame:Add("DPanel")
+			btnpanel:Dock(BOTTOM)
+			function btnpanel:Paint() end
+
 			local label_detect = frame:Add("DLabel")
 			label_detect:SetText("...")
-			label_detect:Dock(TOP)
+			label_detect:Dock(BOTTOM)
 			label_detect:SetTall(label_detect:GetTall()*2)
 			label_detect:SetFont("GWater2Param")
 			
-			local confirm = vgui.Create("DButton", frame)
-			confirm:SetPos(260, 160)
+			local confirm = vgui.Create("DButton", btnpanel)
+			confirm:Dock(RIGHT)
 			confirm:SetText("")
 			confirm:SetSize(20, 20)
 			confirm:SetImage("icon16/accept.png")
@@ -466,8 +513,8 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 				label_detect:SetText(_util.get_localised("Presets.import.detected", type))
 			end
 
-			local deny = vgui.Create("DButton", frame)
-			deny:SetPos(110, 160)
+			local deny = vgui.Create("DButton", btnpanel)
+			deny:Dock(LEFT)
 			deny:SetText("")
 			deny:SetSize(20, 20)
 			deny:SetImage("icon16/cross.png")
@@ -499,7 +546,9 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
             styling.draw_main_background(0, 0, w, h)
         end
 		function save:DoClick()
-			local frame = styling.create_blocking_frame(mainFrame)
+			local frame = styling.create_blocking_frame()
+			frame:SetSize(ScrW()/2, ScrH()/2)
+			frame:Center()
 			local label = frame:Add("DLabel")
 			label:Dock(TOP)
 			label:SetText(_util.get_localised("Presets.save.preset_name"))
@@ -513,16 +562,29 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 			label:SetText(_util.get_localised("Presets.save.include_params"))
 			label:SetFont("GWater2Title")
 			local panel = frame:Add("GF_ScrollPanel")
-			panel:Dock(TOP)
-			panel:SetTall(panel:GetTall()*2)
+			panel:Dock(FILL)
+
+			local do_overwrite = panel:Add("DCheckBoxLabel")
+			do_overwrite:SetText("Overwrite all unchecked parameters to defaults")
+			do_overwrite:Dock(TOP)
+			do_overwrite:SetValue(true)
+			function do_overwrite:OnChange(val)
+				if not val then preset['CUST/Master Reset'] = nil return end
+				preset['CUST/Master Reset'] = true
+			end
+
+			--panel:SetTall(panel:GetTall()*2)
 			function panel:Paint() end
 			local paramlist = {}
 			for name,_ in pairs(_parameters) do paramlist[#paramlist+1] = "PHYS/"..name end
 			for name,_ in pairs(_visuals) do paramlist[#paramlist+1] = "VISL/"..name end
 			for name,_ in pairs(_performance) do paramlist[#paramlist+1] = "PERF/"..name end
+			for name,_ in pairs(_interactions) do paramlist[#paramlist+1] = "INTR/"..name end
 			local preset = {}
+			local _checks = {}
 			for k,v in pairs(paramlist) do
 				local check = panel:Add("DCheckBoxLabel")
+				_checks[#_checks + 1] = check
 				local real = ""
 				if v:sub(0, 4) == "VISL" then
 					real = _visuals[v:sub(6)].label:GetText()
@@ -530,6 +592,8 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 					real = _parameters[v:sub(6)].label:GetText()
 				elseif v:sub(0, 4) == "PERF" then
 					real = _performance[v:sub(6)].label:GetText()
+				elseif v:sub(0, 4) == "INTR" then
+					real = _interactions[v:sub(6)].label:GetText()
 				end
 				check:SetText(v:sub(0, 4).."/"..real)
 				check:Dock(TOP)
@@ -564,11 +628,139 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 							local c = _performance[name].mixer:GetColor()
 							preset[v] = {c.r, c.g, c.b, c.a}
 						end
+					elseif section == "INTR" then
+						if _interactions[name].slider then
+							preset[v] = _interactions[name].slider:GetValue()
+						elseif _interactions[name].check then
+							preset[v] = _interactions[name].check:GetChecked() or false
+						elseif _interactions[name].mixer then
+							local c = _interactions[name].mixer:GetColor()
+							preset[v] = {c.r, c.g, c.b, c.a}
+						end
+					else
+						print("!!!", section, name)
 					end
 				end
 			end
-			local confirm = vgui.Create("DButton", frame)
-			confirm:SetPos(260, 160)
+
+			local btn2panel = frame:Add("DPanel")
+			btn2panel:Dock(TOP)
+			function btn2panel:Paint() end
+
+			local deselect_all = vgui.Create("DButton", btn2panel)
+			deselect_all:SetText("Deselect all")
+			deselect_all:Dock(LEFT)
+			deselect_all:SizeToContents()
+			function deselect_all:Paint(w, h)
+				if self:IsHovered() and not self:IsDown() then
+	            	self:SetColor(Color(0, 127, 255, 255))
+	            elseif self:IsDown() then
+	            	self:SetColor(Color(63, 190, 255, 255))
+	            else
+	                self:SetColor(Color(255, 255, 255))
+	            end
+				styling.draw_main_background(0, 0, w, h)
+			end
+			function deselect_all:DoClick()
+				for _,check in pairs(_checks) do
+					check:SetValue(false)
+				end
+			end
+
+			local select_visl = vgui.Create("DButton", btn2panel)
+			select_visl:SetText("Select all VISL")
+			select_visl:Dock(LEFT)
+			select_visl:SizeToContents()
+			function select_visl:Paint(w, h)
+				if self:IsHovered() and not self:IsDown() then
+	            	self:SetColor(Color(0, 127, 255, 255))
+	            elseif self:IsDown() then
+	            	self:SetColor(Color(63, 190, 255, 255))
+	            else
+	                self:SetColor(Color(255, 255, 255))
+	            end
+				styling.draw_main_background(0, 0, w, h)
+			end
+			function select_visl:DoClick()
+				for _,check in pairs(_checks) do
+					if check:GetText():sub(0,4) == "VISL" then
+						check:SetValue(true)
+					end
+				end
+			end
+
+			local select_phys = vgui.Create("DButton", btn2panel)
+			select_phys:SetText("Select all PHYS")
+			select_phys:Dock(LEFT)
+			select_phys:SizeToContents()
+			function select_phys:Paint(w, h)
+				if self:IsHovered() and not self:IsDown() then
+	            	self:SetColor(Color(0, 127, 255, 255))
+	            elseif self:IsDown() then
+	            	self:SetColor(Color(63, 190, 255, 255))
+	            else
+	                self:SetColor(Color(255, 255, 255))
+	            end
+				styling.draw_main_background(0, 0, w, h)
+			end
+			function select_phys:DoClick()
+				for _,check in pairs(_checks) do
+					if check:GetText():sub(0,4) == "PHYS" then
+						check:SetValue(true)
+					end
+				end
+			end
+
+			local select_perf = vgui.Create("DButton", btn2panel)
+			select_perf:SetText("Select all PERF")
+			select_perf:Dock(LEFT)
+			select_perf:SizeToContents()
+			function select_perf:Paint(w, h)
+				if self:IsHovered() and not self:IsDown() then
+	            	self:SetColor(Color(0, 127, 255, 255))
+	            elseif self:IsDown() then
+	            	self:SetColor(Color(63, 190, 255, 255))
+	            else
+	                self:SetColor(Color(255, 255, 255))
+	            end
+				styling.draw_main_background(0, 0, w, h)
+			end
+			function select_perf:DoClick()
+				for _,check in pairs(_checks) do
+					if check:GetText():sub(0,4) == "PERF" then
+						check:SetValue(true)
+					end
+				end
+			end
+
+			local select_itrc = vgui.Create("DButton", btn2panel)
+			select_itrc:SetText("Select all INTR")
+			select_itrc:Dock(LEFT)
+			select_itrc:SizeToContents()
+			function select_itrc:Paint(w, h)
+				if self:IsHovered() and not self:IsDown() then
+	            	self:SetColor(Color(0, 127, 255, 255))
+	            elseif self:IsDown() then
+	            	self:SetColor(Color(63, 190, 255, 255))
+	            else
+	                self:SetColor(Color(255, 255, 255))
+	            end
+				styling.draw_main_background(0, 0, w, h)
+			end
+			function select_itrc:DoClick()
+				for _,check in pairs(_checks) do
+					if check:GetText():sub(0,4) == "INTR" then
+						check:SetValue(true)
+					end
+				end
+			end
+
+			local btnpanel = frame:Add("DPanel")
+			btnpanel:Dock(BOTTOM)
+			function btnpanel:Paint() end
+
+			local confirm = vgui.Create("DButton", btnpanel)
+			confirm:Dock(RIGHT)
 			confirm:SetText("")
 			confirm:SetSize(20, 20)
 			confirm:SetImage("icon16/accept.png")
@@ -588,8 +780,8 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 				if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/select_ok.wav", 75, 100, 1, CHAN_STATIC) end
 			end
 
-			local deny = vgui.Create("DButton", frame)
-			deny:SetPos(110, 160)
+			local deny = vgui.Create("DButton", btnpanel)
+			deny:Dock(LEFT)
 			deny:SetText("")
 			deny:SetSize(20, 20)
 			deny:SetImage("icon16/cross.png")

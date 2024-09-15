@@ -280,6 +280,11 @@ local strings = {
 
 		Note that a higher limit will negatively impact performance even with the same number of particles spawned.
 	]],
+	["gwater2.menu.Performance.Particle Limit.title"] = "You are about to change the particle limit to %d (%s)\nAre you sure?",
+	["gwater2.menu.Performance.Particle Limit.warning"] = "This can be dangerous, because all particles must be allocated on the GPU.\n"..
+														  "DO NOT set the limit to a number higher then you think your computer can handle.\n"..
+														  "I DO NOT take responsiblity for any damage to your computer this may cause.",
+
 	["gwater2.menu.Performance.Iterations"]="Iterations",
 	["gwater2.menu.Performance.Iterations.desc"]=[[
 		Controls how many times the physics solver attempts to converge to a solution per substep.
@@ -316,11 +321,20 @@ local strings = {
 		Hover over a parameter to see it's description.
 	]],
 	["gwater2.menu.Menu.sounds"]="Play sounds",
+	["gwater2.menu.Menu.sounds.desc"]="Should menu play sounds on various actions?",
 	["gwater2.menu.Menu.animations"]="Animate menu",
+	["gwater2.menu.Menu.animations.desc"]="Should menu be animated?",
 	["gwater2.menu.Menu.preview"]="Show fluid preview",
+	["gwater2.menu.Menu.preview.desc"]="Should fluid preview be simulated and rendered?",
+	["gwater2.menu.Menu.pixelate_preview"]="Pixelate fluid preview",
+	["gwater2.menu.Menu.pixelate_preview.desc"]="Should fluid preview be pixelated?",
+	
+	
+	
 
 	["gwater2.menu.Fluid Preview.title"]="Fluid Preview",
 	["gwater2.menu.Explanation Area.title"]="Explanation Area"
 }
+
 
 return strings, "english"
