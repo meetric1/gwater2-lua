@@ -1,6 +1,6 @@
 SWEP.PrintName = "Water Gun"
     
-SWEP.Author = "Mee / Neatro" 
+SWEP.Author = "Mee / Neatro / googer_" 
 SWEP.Purpose = "shoots water"
 SWEP.Instructions = "you'll figure it out"
 SWEP.Category = "GWater2" 
