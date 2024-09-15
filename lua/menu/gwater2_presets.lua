@@ -13,14 +13,17 @@ local _util = include("menu/gwater2_util.lua")
 local default_presets = {
 	["000-(Default) Water"]={
 		["CUST/Author"]="Meetric",
-		["CUST/Master Reset"]=true
+		["CUST/Master Reset"]=true,
+		["CUST/Default Preset Version"]=1
 	},
 	["001-Acid"]={
 		["CUST/Author"]="Meetric",
 		["VISL/Color"]={240, 255, 0, 150},
 		["PHYS/Adhesion"]=0.1,
 		["PHYS/Viscosity"]=0,
-		["CUST/Master Reset"]=true
+		["INTR/TouchDamage"]=2,
+		["CUST/Master Reset"]=true,
+		["CUST/Default Preset Version"]=1
 	},
 	["002-Blood"]={
 		["CUST/Author"]="GHM",
@@ -30,7 +33,8 @@ local default_presets = {
 		["PHYS/Viscosity"]=1,
 		["PHYS/Surface Tension"]=0,
 		["PHYS/Fluid Rest Distance"]=0.55,
-		["CUST/Master Reset"]=true
+		["CUST/Master Reset"]=true,
+		["CUST/Default Preset Version"]=1
 	},
 	["003-Glue"]={ -- yeah, sure... "glue"...
 		["CUST/Author"]="Meetric",
@@ -38,8 +42,9 @@ local default_presets = {
 		["PHYS/Cohesion"]=0.03,
 		["PHYS/Adhesion"]=0.1,
 		["PHYS/Viscosity"]=10,
-		["PHYS/Surface Tension"]=(2^31-1),
-		["CUST/Master Reset"]=true
+		["INTR/MultiplyWalk"]=0.25,
+		["CUST/Master Reset"]=true,
+		["CUST/Default Preset Version"]=1
 	},
 	["004-Lava"]={
 		["CUST/Author"]="Meetric",
@@ -47,7 +52,10 @@ local default_presets = {
 		["PHYS/Cohesion"]=0.1,
 		["PHYS/Adhesion"]=0.01,
 		["PHYS/Viscosity"]=10,
-		["CUST/Master Reset"]=true
+		["INTR/TouchDamage"]=5,
+		["INTR/MultiplyWalk"]=0.25,
+		["CUST/Master Reset"]=true,
+		["CUST/Default Preset Version"]=1
 	},
 	["005-Oil"]={ -- SOMEONE SAID OIL?? *freedom sounds*
 		["CUST/Author"]="Meetric",
@@ -56,7 +64,9 @@ local default_presets = {
 		["PHYS/Adhesion"]=0,
 		["PHYS/Viscosity"]=0,
 		["PHYS/Surface Tension"]=0,
-		["CUST/Master Reset"]=true
+		["INTR/MultiplyWalk"]=0.25,
+		["CUST/Master Reset"]=true,
+		["CUST/Default Preset Version"]=1
 	},
 	["006-Goop"]={
 		["CUST/Author"]="Meetric",
@@ -65,9 +75,21 @@ local default_presets = {
 		["PHYS/Adhesion"]=0.1,
 		["PHYS/Viscosity"]=10,
 		["PHYS/Surface Tension"]=0.25,
-		["CUST/Master Reset"]=true
+		["INTR/MultiplyWalk"]=0.25,
+		["CUST/Master Reset"]=true,
+		["CUST/Default Preset Version"]=1
 	}
 }
+
+local presets = util.JSONToTable(file.Read("gwater2/presets.txt"))
+for name,preset in pairs(presets) do
+	if not default_presets[name] then continue end
+	if (preset["CUST/Default Preset Version"] or -1) >= default_presets[name]["CUST/Default Preset Version"] then continue end
+	if preset["CUST/Author"] == LocalPlayer():Name() then continue end
+	presets[name] = default_presets[name]
+end
+file.Write("gwater2/presets.txt", util.TableToJSON(presets))
+
 
 function gwater2.options.detect_preset_type(preset)
 	if util.JSONToTable(preset) ~= nil then
@@ -335,6 +357,29 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
         end
 		function selector:DoClick()
 			if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/confirm.wav", 75, 100, 1, CHAN_STATIC) end
+			if v["CUST/Master Reset"] then
+				local paramlist = {}
+				for name,_ in pairs(_parameters) do
+					if _.slider then _.slider:SetValue(gwater2.options.parameters[name:lower():gsub(" ", "_")].default) end
+					if _.check then _.check:SetValue(gwater2.options.parameters[name:lower():gsub(" ", "_")].default) end
+					if _.mixer then _.mixer:SetColor(gwater2.options.parameters[name:lower():gsub(" ", "_")].default) end
+				end
+				for name,_ in pairs(_visuals) do
+					if _.slider then _.slider:SetValue(gwater2.options.parameters[name:lower():gsub(" ", "_")].default) end
+					if _.check then _.check:SetValue(gwater2.options.parameters[name:lower():gsub(" ", "_")].default) end
+					if _.mixer then _.mixer:SetColor(gwater2.options.parameters[name:lower():gsub(" ", "_")].default) end
+				end
+				for name,_ in pairs(_performance) do
+					if _.slider then _.slider:SetValue(gwater2.options.parameters[name:lower():gsub(" ", "_")].default) end
+					if _.check then _.check:SetValue(gwater2.options.parameters[name:lower():gsub(" ", "_")].default) end
+					if _.mixer then _.mixer:SetColor(gwater2.options.parameters[name:lower():gsub(" ", "_")].default) end
+				end
+				for name,_ in pairs(_interactions) do
+					if _.slider then _.slider:SetValue(gwater2.options.parameters[name:lower():gsub(" ", "_")].default) end
+					if _.check then _.check:SetValue(gwater2.options.parameters[name:lower():gsub(" ", "_")].default) end
+					if _.mixer then _.mixer:SetColor(gwater2.options.parameters[name:lower():gsub(" ", "_")].default) end
+				end
+			end
 			for k,v in pairs(v) do
 				local section = k:sub(0, 4)
 				local name = k:sub(6)
@@ -377,8 +422,6 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 					elseif _interactions[name].mixer then
 						_interactions[name].mixer:SetColor(Color(v[1], v[2], v[3], v[4]))
 					end
-				else
-					print("!!!", section, name)
 				end
 
 				if section == "VISL" then
@@ -564,14 +607,16 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 			local panel = frame:Add("GF_ScrollPanel")
 			panel:Dock(FILL)
 
+			local preset = {}
+
 			local do_overwrite = panel:Add("DCheckBoxLabel")
 			do_overwrite:SetText("Overwrite all unchecked parameters to defaults")
 			do_overwrite:Dock(TOP)
-			do_overwrite:SetValue(true)
 			function do_overwrite:OnChange(val)
 				if not val then preset['CUST/Master Reset'] = nil return end
 				preset['CUST/Master Reset'] = true
 			end
+			do_overwrite:SetValue(true)
 
 			--panel:SetTall(panel:GetTall()*2)
 			function panel:Paint() end
@@ -580,7 +625,6 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 			for name,_ in pairs(_visuals) do paramlist[#paramlist+1] = "VISL/"..name end
 			for name,_ in pairs(_performance) do paramlist[#paramlist+1] = "PERF/"..name end
 			for name,_ in pairs(_interactions) do paramlist[#paramlist+1] = "INTR/"..name end
-			local preset = {}
 			local _checks = {}
 			for k,v in pairs(paramlist) do
 				local check = panel:Add("DCheckBoxLabel")
