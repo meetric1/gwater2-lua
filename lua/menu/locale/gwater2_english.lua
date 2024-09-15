@@ -65,6 +65,12 @@ local strings = {
 		Controls how water interacts with players.
 	]],
 
+	["gwater2.menu.Developer.title"]="Developer",
+	["gwater2.menu.Developer.titletext"]="Developer",
+	["gwater2.menu.Developer.help"]=[[
+		Various settings that are not intended to be used in presets or can break your game.
+	]],
+
 	["gwater2.menu.Presets.title"]="Presets",
 	["gwater2.menu.Presets.titletext"]="Presets",
 	["gwater2.menu.Presets.help"]=[[
@@ -313,6 +319,51 @@ local strings = {
 	["gwater2.menu.Interactions.TouchDamage"]="Touch Damage",
 	["gwater2.menu.Interactions.TouchDamage.desc"]="Controls how much damage will be dealt every tick that you are in water.",
 
+	["gwater2.menu.Developer.static_friction"] = "static_friction",
+	["gwater2.menu.Developer.static_friction.desc"] = "Seems to do nothing",
+	["gwater2.menu.Developer.dynamic_friction"] = "dynamic_friction",
+	["gwater2.menu.Developer.dynamic_friction.desc"] = "Controls friction between particles and solids",
+	["gwater2.menu.Developer.particle_friction"] = "particle_friction",
+	["gwater2.menu.Developer.particle_friction.desc"] = "Seems to do nothing",
+	["gwater2.menu.Developer.free_surface_drag"] = "free_surface_drag",
+	["gwater2.menu.Developer.free_surface_drag.desc"] = "Seems to do nothing",
+	["gwater2.menu.Developer.drag"] = "drag",
+	["gwater2.menu.Developer.drag.desc"] = "Seems to do nothing",
+	["gwater2.menu.Developer.lift"] = "lift",
+	["gwater2.menu.Developer.lift.desc"] = "Seems to do nothing",
+	["gwater2.menu.Developer.solid_rest_distance"] = "solid_rest_distance",
+	["gwater2.menu.Developer.solid_rest_distance.desc"] = "Controls rest distance to solids?",
+	["gwater2.menu.Developer.smoothing"] = "smoothing",
+	["gwater2.menu.Developer.smoothing.desc"] = "Controls how smoothed out particles will be?",
+	["gwater2.menu.Developer.dissipation"] = "dissipation",
+	["gwater2.menu.Developer.dissipation.desc"] = "Looks like it makes particle lose their velocity when in contact with each other",
+	["gwater2.menu.Developer.damping"] = "damping",
+	["gwater2.menu.Developer.damping.desc"] = "Controls how much liquid resists the any movement",
+	["gwater2.menu.Developer.particle_collision_margin"] = "particle_collision_margin",
+	["gwater2.menu.Developer.particle_collision_margin.desc"] = "Controls particle radius while calculating collision between particles",
+	["gwater2.menu.Developer.shape_collision_margin"] = "shape_collision_margin",
+	["gwater2.menu.Developer.shape_collision_margin.desc"] = "Controls particle radius while calcualting collision between solids",
+	["gwater2.menu.Developer.sleep_threshold"] = "sleep_threshold",
+	["gwater2.menu.Developer.sleep_threshold.desc"] = "Seems to do nothing",
+	["gwater2.menu.Developer.shock_propagation"] = "shock_propagation",
+	["gwater2.menu.Developer.shock_propagation.desc"] = "Can't get to know. Makes my game lag to hell as soon as it's not 0. Thank you FleX",
+	["gwater2.menu.Developer.restitution"] = "restitution",
+	["gwater2.menu.Developer.restitution.desc"] = "Looks like it makes fluid \"bounce\" on the world surfaces more.",
+	["gwater2.menu.Developer.max_speed"] = "max_speed",
+	["gwater2.menu.Developer.max_speed.desc"] = "Controls max speed of particles",
+	["gwater2.menu.Developer.max_acceleration"] = "max_acceleration",
+	["gwater2.menu.Developer.max_acceleration.desc"] = "Controls max acceleration of particles",
+	["gwater2.menu.Developer.relaxation_factor"] = "relaxation_factor",
+	["gwater2.menu.Developer.relaxation_factor.desc"] = "I think it controls how fast or easy particles come to rest (\"relax\")",
+	["gwater2.menu.Developer.solid_pressure"] = "solid_pressure",
+	["gwater2.menu.Developer.solid_pressure.desc"] = "Seems to do nothing",
+	["gwater2.menu.Developer.buoyancy"] = "buoyancy",
+	["gwater2.menu.Developer.buoyancy.desc"] = "Controls buoyancy of surrounding air?",
+	["gwater2.menu.Developer.diffuse_buoyancy"] = "diffuse_buoyancy",
+	["gwater2.menu.Developer.diffuse_buoyancy.desc"] = "Controls buoyancy of diffuse particles",
+	["gwater2.menu.Developer.diffuse_drag"] = "diffuse_drag",
+	["gwater2.menu.Developer.diffuse_drag.desc"] = "Controls how much drag do diffuse particles suffer",
+
 	["gwater2.menu.Menu.title"]="Menu",
 	["gwater2.menu.Menu.titletext"]="Menu",
 	["gwater2.menu.Menu.help"]=[[
@@ -328,9 +379,6 @@ local strings = {
 	["gwater2.menu.Menu.preview.desc"]="Should fluid preview be simulated and rendered?",
 	["gwater2.menu.Menu.pixelate_preview"]="Pixelate fluid preview",
 	["gwater2.menu.Menu.pixelate_preview.desc"]="Should fluid preview be pixelated?",
-	
-	
-	
 
 	["gwater2.menu.Fluid Preview.title"]="Fluid Preview",
 	["gwater2.menu.Explanation Area.title"]="Explanation Area"

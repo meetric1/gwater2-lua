@@ -21,7 +21,7 @@ local default_presets = {
 		["VISL/Color"]={240, 255, 0, 150},
 		["PHYS/Adhesion"]=0.1,
 		["PHYS/Viscosity"]=0,
-		["INTR/TouchDamage"]=2,
+		["INTC/TouchDamage"]=2,
 		["CUST/Master Reset"]=true,
 		["CUST/Default Preset Version"]=1
 	},
@@ -42,7 +42,7 @@ local default_presets = {
 		["PHYS/Cohesion"]=0.03,
 		["PHYS/Adhesion"]=0.1,
 		["PHYS/Viscosity"]=10,
-		["INTR/MultiplyWalk"]=0.25,
+		["INTC/MultiplyWalk"]=0.25,
 		["CUST/Master Reset"]=true,
 		["CUST/Default Preset Version"]=1
 	},
@@ -52,8 +52,8 @@ local default_presets = {
 		["PHYS/Cohesion"]=0.1,
 		["PHYS/Adhesion"]=0.01,
 		["PHYS/Viscosity"]=10,
-		["INTR/TouchDamage"]=5,
-		["INTR/MultiplyWalk"]=0.25,
+		["INTC/TouchDamage"]=5,
+		["INTC/MultiplyWalk"]=0.25,
 		["CUST/Master Reset"]=true,
 		["CUST/Default Preset Version"]=1
 	},
@@ -64,7 +64,7 @@ local default_presets = {
 		["PHYS/Adhesion"]=0,
 		["PHYS/Viscosity"]=0,
 		["PHYS/Surface Tension"]=0,
-		["INTR/MultiplyWalk"]=0.25,
+		["INTC/MultiplyWalk"]=0.25,
 		["CUST/Master Reset"]=true,
 		["CUST/Default Preset Version"]=1
 	},
@@ -75,7 +75,7 @@ local default_presets = {
 		["PHYS/Adhesion"]=0.1,
 		["PHYS/Viscosity"]=10,
 		["PHYS/Surface Tension"]=0.25,
-		["INTR/MultiplyWalk"]=0.25,
+		["INTC/MultiplyWalk"]=0.25,
 		["CUST/Master Reset"]=true,
 		["CUST/Default Preset Version"]=1
 	}
@@ -414,7 +414,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 					elseif _performance[name].mixer then
 						_performance[name].mixer:SetColor(Color(v[1], v[2], v[3], v[4]))
 					end
-				elseif section == "INTR" then
+				elseif section == "INTC" then
 					if _interactions[name].slider then
 						_interactions[name].slider:SetValue(v)
 					elseif _interactions[name].check then
@@ -624,7 +624,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 			for name,_ in pairs(_parameters) do paramlist[#paramlist+1] = "PHYS/"..name end
 			for name,_ in pairs(_visuals) do paramlist[#paramlist+1] = "VISL/"..name end
 			for name,_ in pairs(_performance) do paramlist[#paramlist+1] = "PERF/"..name end
-			for name,_ in pairs(_interactions) do paramlist[#paramlist+1] = "INTR/"..name end
+			for name,_ in pairs(_interactions) do paramlist[#paramlist+1] = "INTC/"..name end
 			local _checks = {}
 			for k,v in pairs(paramlist) do
 				local check = panel:Add("DCheckBoxLabel")
@@ -636,7 +636,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 					real = _parameters[v:sub(6)].label:GetText()
 				elseif v:sub(0, 4) == "PERF" then
 					real = _performance[v:sub(6)].label:GetText()
-				elseif v:sub(0, 4) == "INTR" then
+				elseif v:sub(0, 4) == "INTC" then
 					real = _interactions[v:sub(6)].label:GetText()
 				end
 				check:SetText(v:sub(0, 4).."/"..real)
@@ -672,7 +672,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 							local c = _performance[name].mixer:GetColor()
 							preset[v] = {c.r, c.g, c.b, c.a}
 						end
-					elseif section == "INTR" then
+					elseif section == "INTC" then
 						if _interactions[name].slider then
 							preset[v] = _interactions[name].slider:GetValue()
 						elseif _interactions[name].check then
@@ -778,7 +778,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 			end
 
 			local select_itrc = vgui.Create("DButton", btn2panel)
-			select_itrc:SetText("Select all INTR")
+			select_itrc:SetText("Select all INTC")
 			select_itrc:Dock(LEFT)
 			select_itrc:SizeToContents()
 			function select_itrc:Paint(w, h)
@@ -793,7 +793,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 			end
 			function select_itrc:DoClick()
 				for _,check in pairs(_checks) do
-					if check:GetText():sub(0,4) == "INTR" then
+					if check:GetText():sub(0,4) == "INTC" then
 						check:SetValue(true)
 					end
 				end

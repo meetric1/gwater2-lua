@@ -181,7 +181,6 @@ local visuals = {
 	}
 }
 local performance = {
-
 	["001-Iterations"] = {
 		min=1,
 		max=10,
@@ -433,6 +432,140 @@ local interaction = {
         setup=function(scratch) end
     },
 }
+local developer = {
+	["001-static_friction"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["002-dynamic_friction"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["003-particle_friction"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["004-free_surface_drag"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["005-drag"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["006-lift"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["007-solid_rest_distance"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["008-smoothing"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["009-dissipation"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["010-damping"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["011-particle_collision_margin"] = {
+		min=-10,
+		max=10,
+		decimals=2,
+		type="scratch"
+	},
+	["012-shape_collision_margin"] = {
+		min=-10,
+		max=10,
+		decimals=2,
+		type="scratch"
+	},
+	["013-sleep_threshold"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["014-shock_propagation"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["015-restitution"] = {
+		min=-10,
+		max=10,
+		decimals=2,
+		type="scratch"
+	},
+	["016-max_speed"] = {
+		min=-1e5,
+		max=1e5,
+		decimals=2,
+		type="scratch"
+	},
+	["017-max_acceleration"] = {
+		min=-1e5,
+		max=1e5,
+		decimals=2,
+		type="scratch"
+	},
+	["018-relaxation_factor"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["019-solid_pressure"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["020-buoyancy"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["021-diffuse_buoyancy"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+	["022-diffuse_drag"] = {
+		min=-1,
+		max=1,
+		decimals=2,
+		type="scratch"
+	},
+}
 
-gwater2.__PARAMS__ = {parameters=parameters, visuals=visuals, performance=performance, interaction=interaction}
+gwater2.__PARAMS__ = {parameters=parameters, visuals=visuals, performance=performance, interaction=interaction, developer=developer}
 return gwater2.__PARAMS__

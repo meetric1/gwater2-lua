@@ -193,9 +193,57 @@ local function interaction_tab(tabs)
 	return params, tab
 end
 
+local function developer_tab(tabs)
+	local tab = vgui.Create("DPanel", tabs)
+	function tab:Paint() end
+	tabs:AddSheet(util.get_localised("Developer.title"), tab, "icon16/chart_curve.png").Tab.realname = "Developer"
+	tab = tab:Add("GF_ScrollPanel")
+	tab:Dock(FILL)
+
+	styling.define_scrollbar(tab:GetVBar())
+
+	local _ = tab:Add("DLabel") _:SetText(" ") _:SetFont("GWater2Title") _:Dock(TOP) _:SizeToContents()
+	function _:Paint(w, h)
+		draw.DrawText(util.get_localised("Developer.titletext"), "GWater2Title", 6, 6, Color(0, 0, 0), TEXT_ALIGN_LEFT)
+		draw.DrawText(util.get_localised("Developer.titletext"), "GWater2Title", 5, 5, Color(187, 245, 255), TEXT_ALIGN_LEFT)
+	end
+
+	local _params = params
+
+	local params = {}
+	local pan = tab:Add("Panel")
+	pan.help_text = tabs.help_text
+	function pan:Paint(w, h) styling.draw_main_background(0, 0, w, h) end
+
+	for name,param in SortedPairs(_params.developer) do
+		if param.type == "scratch" then
+			params[name:sub(5)] = util.make_parameter_scratch(pan, "Developer."..name:sub(5), name:sub(5), param)
+		elseif param.type == "color" then
+			params[name:sub(5)] = util.make_parameter_color(pan, "Developer."..name:sub(5), name:sub(5), param)
+		elseif param.type == "check" then
+			params[name:sub(5)] = util.make_parameter_check(pan, "Developer."..name:sub(5), name:sub(5), param)
+		else
+			error("got unknown parameter type in \"developer\" menu generation: \""..param.type.."\" at "..name)
+		end
+	end
+	local ttall = pan:GetTall()+5
+	for _,i in pairs(pan:GetChildren()) do
+		ttall = ttall + i:GetTall()
+	end
+	ttall = ttall - 20
+	pan:SetTall(ttall)
+	pan:Dock(TOP)
+	pan:InvalidateChildren()
+	pan:DockMargin(5, 5, 5, 5)
+	pan:DockPadding(5, 5, 5, 5)
+
+	return tab
+end
+
 return {
 	parameters_tab=parameters_tab,
 	visuals_tab=visuals_tab,
 	performance_tab=performance_tab,
-	interaction_tab=interaction_tab
+	interaction_tab=interaction_tab,
+	developer_tab=developer_tab
 }

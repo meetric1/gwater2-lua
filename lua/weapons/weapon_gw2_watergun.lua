@@ -56,7 +56,7 @@ function SWEP:PrimaryAttack()
 	local forward = owner:EyeAngles():Forward()
 	
 	local pos = util.QuickTrace(owner:EyePos(), owner:GetAimVector() * 200, owner).HitPos + owner:GetAimVector() * -10
-	pos = owner:EyePos() + ((pos - owner:EyePos()) * gwater2.parameters.fluid_rest_distance or 0.55)
+	pos = owner:EyePos() + ((pos - owner:EyePos()) * (gwater2.parameters.fluid_rest_distance or 0.55))
 
 	gwater2.AddCylinder(
 		gwater2.quick_matrix(
