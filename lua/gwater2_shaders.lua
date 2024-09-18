@@ -34,22 +34,29 @@ local antialias = GetConVar("mat_antialias")
 
 local lightpos = EyePos()
 
+local csmodel = gwater2.renderer.csmodel or ClientsideModel("models/shadertest/envballs.mdl")
+csmodel:SetNoDraw(true)
+
 -- makes lighting work properly in sourceengine
+local unfuck_lighting_table1, unfuck_lighting_table2 = {model="models/shadertest/envballs.mdl"}, {model="models/shadertest/vertexlit.mdl"}
 local function unfuck_lighting(pos0, pos1)
+	local eyeangles = EyeAngles()
+	unfuck_lighting_table1.pos = pos0
+	unfuck_lighting_table1.angle = eyeangles
+	unfuck_lighting_table2.pos = pos1
+	unfuck_lighting_table2.angle = eyeangles
 	render.PushRenderTarget(cache_screen0)	-- rt doesnt matter, just dont write it to the main one
 	render.OverrideDepthEnable(true, false)
-	render.Model({model="models/shadertest/envballs.mdl",pos=pos0, angle = EyeAngles()})	-- cubemap
-	render.Model({model="models/shadertest/vertexlit.mdl",pos=pos1, angle = EyeAngles()}) 	-- lighting
+	render.Model(unfuck_lighting_table1, csmodel)	-- cubemap
+	render.Model(unfuck_lighting_table2, csmodel) 	-- lighting
 	render.OverrideDepthEnable(false, false)
 	render.PopRenderTarget()
 end
 
 -- gwater2 shader pipeline
-hook.Add("PostDrawOpaqueRenderables", "gwater2_render", function(depth, sky, sky3d)	--PreDrawViewModels
-	if gwater2.solver:GetActiveParticles() < 1 then return end
 
-	if sky3d or render.GetRenderTarget() then return end
 
+local function render_gwater2()
 	-- Clear render targets
 	render.ClearRenderTarget(cache_normals, Color(0, 0, 0, 0))
 	render.ClearRenderTarget(cache_depth, Color(0, 0, 0, 0))
@@ -162,6 +169,27 @@ hook.Add("PostDrawOpaqueRenderables", "gwater2_render", function(depth, sky, sky
 	if debug_absorption:GetBool() then render.DrawTextureToScreenRect(cache_absorption, ScrW() * 0.75, (ScrH() / 4) * dbg, ScrW() / 4, ScrH() / 4); dbg = dbg + 1 end
 	if debug_normals:GetBool() then render.DrawTextureToScreenRect(cache_normals, ScrW() * 0.75, (ScrH() / 4) * dbg, ScrW() / 4, ScrH() / 4); dbg = dbg + 1 end
 	if debug_depth:GetBool() then render.DrawTextureToScreenRect(cache_depth, ScrW() * 0.75, (ScrH() / 4) * dbg, ScrW() / 4, ScrH() / 4); dbg = dbg + 1 end
+end
+
+hook.Add("PreDrawOpaqueRenderables", "gwater2_render", function(depth, sky, sky3d)	--PreDrawViewModels
+	if gwater2.solver:GetActiveParticles() < 1 then return end
+
+	--if ({water:GetVector4D("$color2")})[4] < 255 then return end
+
+	if sky3d or render.GetRenderTarget() then return end
+
+	render_gwater2()
+end)
+
+hook.Add("PostDrawOpaqueRenderables", "gwater2_render", function(depth, sky, sky3d)	--PreDrawViewModels
+	do return end
+	if gwater2.solver:GetActiveParticles() < 1 then return end
+
+	if ({water:GetVector4D("$color2")})[4] >= 255 then return end
+
+	if sky3d or render.GetRenderTarget() and ({water:GetVector4D("$color2")})[4] >= 255 then return end
+
+	render_gwater2()
 end)
 
 --hook.Add("NeedsDepthPass", "gwater2_depth", function()

@@ -310,6 +310,7 @@ local function make_parameter_check(tab, locale_parameter_name, parameter_name, 
 	panel.check = check
 	panel.button = button
 	if parameter.setup then parameter.setup(check) end
+	gwater2.options.initialised[string.lower(parameter_name):gsub(" ", "_")] = {parameter, check}
 	function button:DoClick()
 		check:SetValue(gwater2.options.parameters[string.lower(parameter_name):gsub(" ", "_")].default)
 		if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/reset.wav", 75, 100, 1, CHAN_STATIC) end

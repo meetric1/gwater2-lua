@@ -88,6 +88,12 @@ if SERVER then
 		-- if not ply:IsSuperAdmin() then return end -- do not accept change of parameters from non-superadmins
 		gwater2.ChangeParameter(net.ReadString(), net.ReadType(), ply)
 	end)
+
+	net.Receive("GWATER2_RESETSOLVER", function(len, ply)
+		-- if not ply:IsSuperAdmin() then return end -- do not accept solver reset from non-superadmins
+		gwater2.ResetSolver()
+	end)
+
 	net.Receive("GWATER2_REQUESTPARAMETERSSNAPSHOT", function(len, ply)
 		-- TODO
 	end)
@@ -96,6 +102,10 @@ else	-- CLIENT
 		net.Start("GWATER2_CHANGEPARAMETER")
 			net.WriteString(name)
 			net.WriteType(value)
+		net.SendToServer()
+	end
+	gwater2.ResetSolver = function()
+		net.Start("GWATER2_RESETSOLVER")
 		net.SendToServer()
 	end
 

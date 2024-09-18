@@ -143,6 +143,48 @@ local function create_menu()
 	divider:SetLeftWidth(sim_preview:GetWide())
 	divider:SetLeftMin(20)
 
+	local q_access = vgui.Create("DPanel", frame)
+	q_access:Dock(BOTTOM)
+	q_access:DockMargin(0, 5, 0, 0)
+	function q_access:Paint(w, h) styling.draw_main_background(0, 0, w, h) end
+
+	local qreset = q_access:Add("DImageButton")
+	qreset:SetImage("icon16/arrow_refresh.png")
+	qreset:SetSize(q_access:GetTall() - 4, q_access:GetTall() - 4)
+	qreset:SetPos(2, 2)
+	qreset:SetTooltip("Reset solvers (clean all water)")
+	function qreset:DoClick()
+		gwater2.options.solver:Reset()
+		gwater2.ResetSolver()
+		if gwater2.options.read_config().sounds then LocalPlayer():EmitSound("gwater2/menu/reset.wav", 75, 100, 1, CHAN_STATIC) end
+	end
+
+	local qgun = q_access:Add("DImageButton")
+	qgun:SetImage("icon16/gun.png")
+	qgun:SetSize(q_access:GetTall() - 4, q_access:GetTall() - 4)
+	qgun:SetPos(2*2+qreset:GetWide(), 2)
+	qgun:SetTooltip("Give yourself watergun swep")
+	function qgun:DoClick()
+		RunConsoleCommand("gm_giveswep", "weapon_gw2_watergun")
+	end
+
+	local qwater = q_access:Add("DImageButton")
+	qwater:SetImage("icon16/water.png")
+	qwater:SetSize(q_access:GetTall() - 4, q_access:GetTall() - 4)
+	qwater:SetPos(2*3+qreset:GetWide()*2, 2)
+	qwater:SetTooltip("Reset all parameters to their respective defaults (water preset)")
+	function qwater:DoClick()
+		for k,v in pairs(gwater2.options.parameters) do
+			print(k, gwater2.options.initialised[k])
+			if gwater2.options.initialised[k][2].SetColor then
+				gwater2.options.initialised[k][2]:SetColor(v.default)
+			else
+				gwater2.options.initialised[k][2]:SetValue(v.default)
+			end
+			--util.set_gwater_parameter(k, v.default)
+		end
+	end
+
 	local particle_material = nil
 	local pixelated = "hell"
 	function sim_preview:Paint(w, h)
@@ -187,6 +229,7 @@ local function create_menu()
 			end
 			surface.DrawTexturedRect(px, py, radius, radius)
 		end)
+		styling.draw_main_background(0, 0, w, h)
 
 		styling.draw_main_background(0, 0, sim_preview:GetWide(), 30)
 		draw.DrawText(util.get_localised("Fluid Preview.title"), "GWater2Title", sim_preview:GetWide() / 2 + 1, 6, Color(0, 0, 0), TEXT_ALIGN_CENTER)
