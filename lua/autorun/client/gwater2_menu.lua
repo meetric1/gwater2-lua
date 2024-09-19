@@ -201,7 +201,7 @@ local function create_menu()
 
 		local mat = Matrix()
 		mat:SetTranslation(Vector(x + w / 2 + math.random(), 0, y + radius))
-		gwater2.options.solver:InitBounds(Vector(x, 0, y), Vector(x + w, radius, y + h))
+		gwater2.options.solver:InitBounds(Vector(x-radius, 0, y), Vector(x + w, radius, y + h))
 		gwater2.options.solver:AddCube(mat, Vector(4, 1, 1), {vel = Vector(0, 0, 50)})
 		gwater2.options.solver:Tick(1 / 60)
 

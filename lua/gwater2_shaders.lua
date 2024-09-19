@@ -34,8 +34,9 @@ local antialias = GetConVar("mat_antialias")
 
 local lightpos = EyePos()
 
-local csmodel = gwater2.renderer.csmodel or ClientsideModel("models/shadertest/envballs.mdl")
+local csmodel = gwater2 and gwater2.csmodel or ClientsideModel("models/shadertest/envballs.mdl")
 csmodel:SetNoDraw(true)
+gwater2.csmodel = csmodel
 
 -- makes lighting work properly in sourceengine
 local unfuck_lighting_table1, unfuck_lighting_table2 = {model="models/shadertest/envballs.mdl"}, {model="models/shadertest/vertexlit.mdl"}
@@ -171,7 +172,8 @@ local function render_gwater2()
 	if debug_depth:GetBool() then render.DrawTextureToScreenRect(cache_depth, ScrW() * 0.75, (ScrH() / 4) * dbg, ScrW() / 4, ScrH() / 4); dbg = dbg + 1 end
 end
 
-hook.Add("PreDrawOpaqueRenderables", "gwater2_render", function(depth, sky, sky3d)	--PreDrawViewModels
+hook.Add("PostDrawTranslucentRenderables", "gwater2_render", function(depth, sky, sky3d)	--PreDrawViewModels
+	--do return end
 	if gwater2.solver:GetActiveParticles() < 1 then return end
 
 	--if ({water:GetVector4D("$color2")})[4] < 255 then return end
@@ -182,10 +184,10 @@ hook.Add("PreDrawOpaqueRenderables", "gwater2_render", function(depth, sky, sky3
 end)
 
 hook.Add("PostDrawOpaqueRenderables", "gwater2_render", function(depth, sky, sky3d)	--PreDrawViewModels
-	do return end
+	do return end -- TODO: obliterated performance, make this a toggle
 	if gwater2.solver:GetActiveParticles() < 1 then return end
 
-	if ({water:GetVector4D("$color2")})[4] >= 255 then return end
+	--if ({water:GetVector4D("$color2")})[4] >= 255 then return end
 
 	if sky3d or render.GetRenderTarget() and ({water:GetVector4D("$color2")})[4] >= 255 then return end
 
