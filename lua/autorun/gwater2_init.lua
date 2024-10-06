@@ -1,11 +1,13 @@
 AddCSLuaFile()
 
-local in_water = include("gwater2_swimming.lua")
-include("gwater2_net.lua")
-
-if SERVER then return end
+if SERVER then 
+	include("gwater2_net.lua")
+	include("gwater2_interactions.lua")
+	return
+end
 
 require((BRANCH == "x86-64" or BRANCH == "chromium" ) and "gwater2" or "gwater2_main")	-- carrying
+
 include("gwater2_shaders.lua")
 
 -- GetMeshConvexes but for client
@@ -73,6 +75,8 @@ local function get_map_vertices()
 	return all_vertices
 end
 
+local in_water = function() end
+
 gwater2 = {
 	solver = FlexSolver(100000),
 	renderer = FlexRenderer(),
@@ -136,6 +140,9 @@ gwater2 = {
 	end
 }
 
+include("gwater2_net.lua")
+in_water = include("gwater2_interactions.lua")
+
 -- setup percentage values (used in menu)
 gwater2["surface_tension"] = gwater2.solver:GetParameter("surface_tension") * gwater2.solver:GetParameter("radius")^4	-- dont ask me why its a power of 4
 gwater2["fluid_rest_distance"] = gwater2.solver:GetParameter("fluid_rest_distance") / gwater2.solver:GetParameter("radius")
@@ -154,6 +161,7 @@ gwater2["force_dampening"] = 0
 
 local limit_fps = 1 / 60
 local function gwater_tick2()
+	if not IsValid(LocalPlayer()) then return end
 	gwater2.solver:ApplyContacts(limit_fps * gwater2["force_multiplier"], 3, gwater2["force_buoyancy"], gwater2["force_dampening"])
 	local particles_in_radius = gwater2.solver:GetParticlesInRadius(LocalPlayer():GetPos() + LocalPlayer():OBBCenter(), gwater2.solver:GetParameter("fluid_rest_distance") * 3, GWATER2_PARTICLES_TO_SWIM)
 	GWATER2_QuickHackRemoveMeASAP(	-- TODO: REMOVE THIS HACKY SHIT!!!!!!!!!!!!!
