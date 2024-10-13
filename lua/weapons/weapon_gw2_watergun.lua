@@ -69,7 +69,7 @@ function SWEP:SecondaryAttack()
 	local owner = self:GetOwner()
 	local forward = owner:EyeAngles():Forward()
 
-	gwater2.solver:AddSphere(gwater2.quick_matrix(owner:EyePos() + forward * 40 * gwater2.solver:GetParameter("fluid_rest_distance")), 20, {vel = forward * 100})
+	gwater2.solver:AddSphere(gwater2.quick_matrix(owner:EyePos() + forward * 40 * gwater2.solver:GetParameter("fluid_rest_distance")), 20, {vel = forward * 15})
 end
 
 function SWEP:Reload()

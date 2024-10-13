@@ -11,7 +11,7 @@ if SERVER or !gwater2 then return end
 	-- HALF OF THIS CODE WAS WRITTEN AT 3 AM
 -- THANK YOU FOR COMING TO MY TED TALK
 
-local version = "0.6b"
+local version = "0.5.1b"
 local options = {
 	solver = FlexSolver(1000),
 	tab = CreateClientConVar("gwater2_tab"..version, "1", true),
@@ -62,7 +62,7 @@ local options = {
 	["Absorption"] = {text = "Enables absorption of light over distance inside of fluid.\n\n(more depth = darker color)\n\nMedium performance impact."},
 	["Depth Fix"] = {text = "Makes particles appear spherical instead of flat, creating a cleaner and smoother water surface.\n\nCauses shader overdraw.\n\nMedium-High performance impact."},
 	["Particle Limit"] = {text = "USE THIS PARAMETER AT YOUR OWN RISK.\n\nChanges the limit of particles.\n\nNote that a higher limit will negatively impact performance even with the same number of particles spawned."},
-	["Reaction Forces"] = {text = "0 = No reaction forces\n\n1 = Simple reaction forces. (Swimming)\n\n2 = Full reaction forces (Water can move props).\n\nNote that reaction forces only work with 'New Solver' on."},
+	["Reaction Forces"] = {text = "0 = No reaction forces\n\n1 = Simple reaction forces. (Swimming)\n\n2 = Full reaction forces (Water can move props)."},
 	
 	["Size"] = {text = "Size of the box the particles spawn in"},
 	["Density"] = {text = "Density of particles.\n Controls how far apart they are"},
@@ -467,7 +467,7 @@ concommand.Add("gwater2_menu", function()
 		local mat = Matrix()
 		mat:SetTranslation(Vector(x + 60 + math.random(), 0, y + 50))
 		options.solver:InitBounds(Vector(x, 0, y + 25), Vector(x + 192, options.solver:GetParameter("radius"), y + 390))
-		options.solver:AddCube(mat, Vector(4, 1, 1), {vel = Vector(0, 0, 50)})
+		options.solver:AddCube(mat, Vector(4, 1, 1), {vel = Vector(0, 0, 7.5)})
 		options.solver:Tick(1 / 60)
 		
 		--average_fps = average_fps + (FrameTime() - average_fps) * 0.01
@@ -885,28 +885,22 @@ I DO NOT take responsiblity for any hardware damage this may cause]], "DermaDefa
 
 			Make sure to read the changelog to see what has been updated!
 
-			Changelog (v0.5b):
-			- Added cloth to spawnmenu
+			Changelog (v0.5.1b):
+			- Added transmuter tool
 
-			- Added black hole to spawnmenu
+			- Added transmuter entity to spawnmenu
 			
 			- Added emitter, and drain entity to spawnmenu
 
-			- Added particle lifetimes (evaporation)
+			- Added spawnmenu icons to entities
 
-			- Added gravity gun interaction
+			- Improved blur performance
+			
+			- Improved particle performance at larger limits
 
-			- Tweaked absorption, reflection, and phong calculations to be more realistic
+			- Improved underwater effect
 
-			- Tweaked diffuse visuals
-
-			- Tweaked portal gel preset to look more like portal gel
-
-			- Fixed particles not going through objects with 'Disable Collision' on
-
-			- Fixed a majority of particle clipping issues
-
-			- Fixed being able to 'fly' in adhesive liquids
+			- Fixed reflections with HDR enabled
 
 			- General backend code cleanup and API improvements
 
@@ -947,7 +941,7 @@ I DO NOT take responsiblity for any hardware damage this may cause]], "DermaDefa
 
 		labels[1], sliders["Size"] = create_slider(scrollPanel, "Size", 1, 10, 0, 50, 370, 0)
 		labels[2], sliders["Density"] = create_slider(scrollPanel, "Density", 0.5, 5, 1, 80, 370, 0)
-		labels[3], sliders["Forward Velocity"] = create_slider(scrollPanel, "Forward Velocity", 0, 300, 0, 110, 370, 0)
+		labels[3], sliders["Forward Velocity"] = create_slider(scrollPanel, "Forward Velocity", 0, 50, 0, 110, 370, 0)
 	end
 
 	local function patron_tab(tabs)

@@ -48,13 +48,13 @@ local function add_prop(ent)
 	if #convexes < 16 then	-- too many convexes to be worth calculating
 		for k, v in ipairs(convexes) do
 			if #v <= 64 * 3 then	-- hardcoded limits.. No more than 64 planes per convex as it is a FleX limitation
-				gwater2.solver:AddConvexMesh(ent:EntIndex(), v, ent:GetPos(), ent:GetAngles())
+				gwater2.solver:AddConvexCollider(ent:EntIndex(), v, ent:GetPos(), ent:GetAngles())
 			else
-				gwater2.solver:AddConcaveMesh(ent:EntIndex(), v, ent:GetPos(), ent:GetAngles())
+				gwater2.solver:AddConcaveCollider(ent:EntIndex(), v, ent:GetPos(), ent:GetAngles())
 			end
 		end
 	else
-		gwater2.solver:AddConcaveMesh(ent:EntIndex(), unfucked_get_mesh(ent, true), ent:GetPos(), ent:GetAngles())
+		gwater2.solver:AddConcaveCollider(ent:EntIndex(), unfucked_get_mesh(ent, true), ent:GetPos(), ent:GetAngles())
 	end
 
 end
@@ -77,17 +77,17 @@ gwater2 = {
 	solver = FlexSolver(100000),
 	renderer = FlexRenderer(),
 	cloth_pos = Vector(),
-	update_meshes = function(index, id, rep)
+	update_colliders = function(index, id, rep)
 		if id == 0 then return end	-- skip, entity is world
 
 		local ent = Entity(id)
 		if !IsValid(ent) then 
-			gwater2.solver:RemoveMesh(id)
+			gwater2.solver:RemoveCollider(id)
 		else 
 			if !util.IsValidRagdoll(ent:GetModel()) then
-				gwater2.solver:SetMeshPos(index, ent:GetPos())
-				gwater2.solver:SetMeshAng(index, ent:GetAngles())
-				gwater2.solver:SetMeshCollide(index, ent:GetCollisionGroup() != COLLISION_GROUP_WORLD and bit.band(ent:GetSolidFlags(), FSOLID_NOT_SOLID) == 0)
+				gwater2.solver:SetColliderPos(index, ent:GetPos())
+				gwater2.solver:SetColliderAng(index, ent:GetAngles())
+				gwater2.solver:SetColliderEnabled(index, ent:GetCollisionGroup() != COLLISION_GROUP_WORLD and bit.band(ent:GetSolidFlags(), FSOLID_NOT_SOLID) == 0)
 			else
 				-- horrible code for proper ragdoll collision. Still breaks half the time. Fuck source
 				local bone_index = ent:TranslatePhysBoneToBone(rep)
@@ -102,19 +102,19 @@ gwater2 = {
 						ang = ent:GetAngles()
 					end
 				end
-				gwater2.solver:SetMeshPos(index, pos)
-				gwater2.solver:SetMeshAng(index, ang)
-				gwater2.solver:SetMeshCollide(index, ent:GetCollisionGroup() != COLLISION_GROUP_WORLD and bit.band(ent:GetSolidFlags(), FSOLID_NOT_SOLID) == 0)
-				if in_water(ent) then gwater2.solver:SetMeshCollide(index, false) end
+				gwater2.solver:SetColliderPos(index, pos)
+				gwater2.solver:SetColliderAng(index, ang)
+				gwater2.solver:SetColliderEnabled(index, ent:GetCollisionGroup() != COLLISION_GROUP_WORLD and bit.band(ent:GetSolidFlags(), FSOLID_NOT_SOLID) == 0)
+				if in_water(ent) then gwater2.solver:SetColliderEnabled(index, false) end
 			end
 		end
 	end,
 
 	reset_solver = function(err)
 		xpcall(function()
-			gwater2.solver:AddMapMesh(0, game.GetMap())
+			gwater2.solver:AddMapCollider(0, game.GetMap())
 		end, function(e)
-			gwater2.solver:AddConcaveMesh(0, get_map_vertices(), Vector(), Angle())
+			gwater2.solver:AddConcaveCollider(0, get_map_vertices(), Vector(), Angle())
 			if !err then
 				ErrorNoHaltWithStack("[GWater2]: Map BSP structure is unsupported. Reverting to brushes. Collision WILL have holes!")
 			end
@@ -127,6 +127,7 @@ gwater2 = {
 		gwater2.solver:InitBounds(Vector(-16384, -16384, -16384), Vector(16384, 16384, 16384))	-- source bounds
 	end,
 	
+	-- defined on server in gwater2_net.lua
 	quick_matrix = function(pos, ang, scale)
 		local mat = Matrix()
 		if pos then mat:SetTranslation(pos) end
@@ -146,7 +147,7 @@ gwater2["blur_passes"] = 3
 -- watergun specific (remove in 0.6)
 gwater2["size"] = 4
 gwater2["density"] = 1
-gwater2["forward_velocity"] = 100
+gwater2["forward_velocity"] = 15
 -- reaction force specific
 gwater2["force_multiplier"] = 0.01
 gwater2["force_buoyancy"] = 0
@@ -154,15 +155,18 @@ gwater2["force_dampening"] = 0
 
 local limit_fps = 1 / 60
 local function gwater_tick2()
+	local lp = LocalPlayer()
+	if !IsValid(lp) then return end
+
 	gwater2.solver:ApplyContacts(limit_fps * gwater2["force_multiplier"], 3, gwater2["force_buoyancy"], gwater2["force_dampening"])
-	local particles_in_radius = gwater2.solver:GetParticlesInRadius(LocalPlayer():GetPos() + LocalPlayer():OBBCenter(), gwater2.solver:GetParameter("fluid_rest_distance") * 3, GWATER2_PARTICLES_TO_SWIM)
+	local particles_in_radius = gwater2.solver:GetParticlesInRadius(lp:GetPos() + lp:OBBCenter(), gwater2.solver:GetParameter("fluid_rest_distance") * 3, GWATER2_PARTICLES_TO_SWIM)
 	GWATER2_QuickHackRemoveMeASAP(	-- TODO: REMOVE THIS HACKY SHIT!!!!!!!!!!!!!
-		LocalPlayer():EntIndex(), 
+	lp:EntIndex(), 
 		particles_in_radius
 	)
-	LocalPlayer().GWATER2_CONTACTS = particles_in_radius
+	lp.GWATER2_CONTACTS = particles_in_radius
 
-	gwater2.solver:IterateMeshes(gwater2.update_meshes)
+	gwater2.solver:IterateColliders(gwater2.update_colliders)
 
 	hook.Run("gwater2_posttick", gwater2.solver:Tick(limit_fps, 0))
 end
