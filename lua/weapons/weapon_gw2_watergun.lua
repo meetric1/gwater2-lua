@@ -60,7 +60,7 @@ function SWEP:PrimaryAttack()
 	mat:SetAngles(owner:EyeAngles() + Angle(90, 0, 0))
 	mat:SetTranslation(owner:EyePos() + forward * 20 * gwater2.solver:GetParameter("fluid_rest_distance"))
 	
-	gwater2.solver:AddCylinder(mat, Vector(gwater2["size"], gwater2["size"], 1), {vel = forward * gwater2["forward_velocity"]})
+	gwater2.solver:AddCylinder(mat, Vector(gwater2["size"], gwater2["size"], 1), {vel = forward * gwater2["forward_velocity"] + (self.Owner:GetVelocity() / 5 ) + forward * 100})
 end
 
 function SWEP:SecondaryAttack()

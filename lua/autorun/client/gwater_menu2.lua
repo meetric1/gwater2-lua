@@ -946,8 +946,11 @@ I DO NOT take responsiblity for any hardware damage this may cause]], "DermaDefa
 
 	local function patron_tab(tabs)
         local scrollPanel = vgui.Create("DScrollPanel", tabs)
-        local scrollEditTab = tabs:AddSheet("Patrons", scrollPanel, "icon16/award_star_gold_3.png").Tab
-		scrollEditTab.Paint = draw_tabs
+                local patrons_table = {}
+        http.Fetch("https://raw.githubusercontent.com/meetric1/gwater2-lua/main/lua/gwater2_patrons.lua", 
+            function( body, length, headers, code )
+                patrons_table = string.Split(body, "\n")
+            end, nil)
 
 		-- Hi - Xenthio
 
