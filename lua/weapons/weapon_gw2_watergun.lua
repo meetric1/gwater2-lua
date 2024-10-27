@@ -64,7 +64,7 @@ function SWEP:PrimaryAttack()
 			owner:EyeAngles() + Angle(90, 0, 0),
 			1),
 		Vector(4, 4, 1),
-		{vel = forward * 100}
+		{vel = forward * 10}
 	)
 end
 
@@ -74,7 +74,7 @@ function SWEP:SecondaryAttack()
 	local owner = self:GetOwner()
 	local forward = owner:EyeAngles():Forward()
 
-	gwater2.AddSphere(gwater2.quick_matrix(owner:EyePos() + forward * 200), 20, {vel = forward * 100})
+	gwater2.AddSphere(gwater2.quick_matrix(owner:EyePos() + forward * 200), 20, {vel = forward * 10})
 end
 
 function SWEP:Reload()

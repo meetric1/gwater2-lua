@@ -28,6 +28,10 @@ local cloth = Material("gwater2/cloth")
 local blur_passes = CreateClientConVar("gwater2_blur_passes", "3", true)
 local blur_scale = CreateClientConVar("gwater2_blur_scale", "1", true)
 
+local debug_absorption = CreateClientConVar("gwater2_debug_absorption", "0", false)
+local debug_normals = CreateClientConVar("gwater2_debug_normals", "0", false)
+local debug_depth = CreateClientConVar("gwater2_debug_depth", "0", false)
+
 -- sets up a lighting origin in sourceengine
 -- TODO: cache your fucking tables and csmodels!!!
 local function unfuck_lighting(pos0, pos1)
