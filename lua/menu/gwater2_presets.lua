@@ -82,13 +82,17 @@ local default_presets = {
 }
 
 local presets = util.JSONToTable(file.Read("gwater2/presets.txt"))
-for name,preset in pairs(presets) do
-	if not default_presets[name] then continue end
-	if (preset["CUST/Default Preset Version"] or -1) >= default_presets[name]["CUST/Default Preset Version"] then continue end
-	if preset["CUST/Author"] == LocalPlayer():Name() then continue end
-	presets[name] = default_presets[name]
-end
-file.Write("gwater2/presets.txt", util.TableToJSON(presets))
+hook.Add("Tick", "GWater2_Menu_Presets_UpdatePresets", function()
+	if not IsValid(LocalPlayer()) then return end
+	hook.Remove("Tick", "GWater2_Menu_Presets_UpdatePresets")
+	for name,preset in pairs(presets) do
+		if not default_presets[name] then continue end
+		if (preset["CUST/Default Preset Version"] or -1) >= default_presets[name]["CUST/Default Preset Version"] then continue end
+		if preset["CUST/Author"] == LocalPlayer():Name() then continue end
+		presets[name] = default_presets[name]
+	end
+	file.Write("gwater2/presets.txt", util.TableToJSON(presets))
+end)
 
 
 function gwater2.options.detect_preset_type(preset)
@@ -105,7 +109,6 @@ function gwater2.options.detect_preset_type(preset)
 
 
 	local preset_parts = preset:Split(',')
-	PrintTable(preset_parts)
 
 	if preset_parts[2] == '' and preset_parts[3] ~= nil then
 		if preset_parts[4] == '' and preset_parts[5] ~= nil and preset_parts[5] ~= '' then
@@ -327,7 +330,6 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 	if not succ then
 		tab.help_text = tabs.help_text
 		_util.make_title_label(tab, _util.get_localised("Presets.critical_fail"))
-		print(presets)
 		return
 	end
 	local local_presets = tab:Add("DPanel")
@@ -681,8 +683,6 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 							local c = _interactions[name].mixer:GetColor()
 							preset[v] = {c.r, c.g, c.b, c.a}
 						end
-					else
-						print("!!!", section, name)
 					end
 				end
 			end
