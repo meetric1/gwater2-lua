@@ -181,10 +181,10 @@ local function gwater_tick2()
 end
 
 timer.Create("gwater2_tick", limit_fps, 0, gwater_tick2)
-hook.Add("InitPostEntity", "gwater2_addprop", gwater2.reset_solver)
-if game.GetWorld() ~= NULL then
-	gwater2.reset_solver()
-end
+hook.Add("Tick", "gwater2_createworld", function()
+	hook.Remove("Tick", "gwater2_createworld")
+	timer.Simple(0, function() gwater2.reset_solver() end)
+end)
 hook.Add("OnEntityCreated", "gwater2_addprop", function(ent)
 	timer.Simple(0, function() add_prop(ent) end)
 end) -- timer.0 so data values are setup correctly

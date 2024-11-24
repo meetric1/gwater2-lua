@@ -1,3 +1,4 @@
+---@diagnostic disable: inject-field
 local params = include("menu/gwater2_params.lua")
 local styling = include("menu/gwater2_styling.lua")
 local util = include("menu/gwater2_util.lua")
@@ -196,7 +197,7 @@ end
 local function developer_tab(tabs)
 	local tab = vgui.Create("DPanel", tabs)
 	function tab:Paint() end
-	tabs:AddSheet(util.get_localised("Developer.title"), tab, "icon16/chart_curve.png").Tab.realname = "Developer"
+	tabs:AddSheet(util.get_localised("Developer.title"), tab, "icon16/bug.png").Tab.realname = "Developer"
 	tab = tab:Add("GF_ScrollPanel")
 	tab:Dock(FILL)
 

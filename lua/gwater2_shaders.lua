@@ -26,7 +26,13 @@ local water_normals = Material("gwater2/normals")
 local water_bubble = Material("gwater2/bubble")	-- bubbles
 local water_mist = Material("gwater2/mist")
 local black = Material("gwater2/black")
-local cloth = Material("gwater2/cloth")
+local cloth = CreateMaterial("gwater2_cloth", "VertexLitGeneric", {
+	["$basetexture"] = "lights/white",
+	["$nocull"] = 1,
+	["$envmap"] = "env_cubemap",
+	["$envmaptint"] = Vector(0, 0, 0)
+})
+cloth:SetVector4D("$color2", 0.5, 0.7, 0.9, 1)
 
 local blur_passes = CreateClientConVar("gwater2_blur_passes", "3", true)
 local blur_scale = CreateClientConVar("gwater2_blur_scale", "1", true)

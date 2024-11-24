@@ -1,0 +1,8 @@
+VertexLitGeneric {
+	$envmap env_cubemap
+	$envmaptint "[0.0 0.0 0.0]"
+	$color2 "[1 1 1]"
+	$basetexture models/props_c17/FurnitureFabric003a
+	$nocull 1
+	$alpha 1
+}

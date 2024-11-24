@@ -1,1 +1,1 @@
-do return end
+-- Legacy file, DO NOT REMOVE

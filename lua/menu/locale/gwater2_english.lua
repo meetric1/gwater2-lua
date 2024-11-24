@@ -71,6 +71,15 @@ local strings = {
 		Various settings that are not intended to be used in presets or can break your game.
 	]],
 
+	["gwater2.menu.Cloth.title"]="Cloth",
+	["gwater2.menu.Cloth.titletext"]="Cloth",
+	["gwater2.menu.Cloth.help"]=[[
+		This tab controls what cloth looks like.
+		Please note that cloth physics are based on liquid parameters due to how FleX works.
+
+		Hover over a parameter to reveal its functionality.
+	]],
+
 	["gwater2.menu.Presets.title"]="Presets",
 	["gwater2.menu.Presets.titletext"]="Presets",
 	["gwater2.menu.Presets.help"]=[[

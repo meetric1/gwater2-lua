@@ -56,7 +56,32 @@ gwater2.options = gwater2.options or {
 		multiplyparticles = {real=60, default=60, val=60, defined=true, func=function() end},
 		multiplywalk = {real=1, default=1, val=1, defined=true, func=function() end},
 		multiplyjump = {real=1, default=1, val=1, defined=true, func=function() end},
-		touchdamage = {real=0, default=0, val=0, defined=true, func=function() end}
+		touchdamage = {real=0, default=0, val=0, defined=true, func=function() end},
+		clothskin = {real="Default", default="Default", val="Default", defined=true, func=function()
+			local mat = Material("!gwater2_cloth")
+			local skin = gwater2.options.parameters.clothskin.real:lower()
+			mat:SetInt("$alpha", 1)
+			mat:SetVector4D("$color2", 1, 1, 1, 1)
+			mat:SetString("$envmap", "env_cubemap")
+			mat:SetVector("$envmaptint", Vector(0, 0, 0))
+			mat:SetInt("$flags", 8192)
+			mat:SetUndefined("$alphatestreference")
+			local mtrx = Matrix()
+			mat:SetMatrix("$basetexturetransform", mtrx)
+			if skin == "wireframe" then
+				mat:SetTexture("$basetexture", "gwater2/cloth/grid.vtf")
+				mtrx:SetScale(Vector(0.1, 0.1, 0.1))
+				mat:SetMatrix("$basetexturetransform", mtrx)
+			elseif skin == "newspaper" then
+				mat:SetTexture("$basetexture", "models/props_c17/paper01")
+			elseif skin == "meetricloth" then
+				mat:SetTexture("$basetexture", "gwater2/cloth/meetric.vtf")
+			else
+				mat:SetTexture("$basetexture", "lights/white")
+				mat:SetVector4D("$color2", 0.5, 0.7, 0.9, 1)
+				mat:SetUndefined("$alpha")
+			end
+		end}
 	}
 }
 
@@ -74,9 +99,10 @@ local params = include("menu/gwater2_params.lua")
 local paramstabs = include("menu/gwater2_paramstabs.lua")
 local styling = include("menu/gwater2_styling.lua")
 local util = include("menu/gwater2_util.lua")
-local GFScrollPanel = include("menu/gf_scrollpanel.lua")
+include("menu/gf_scrollpanel.lua")
 if not file.Exists("gwater2", "DATA") then file.CreateDir("gwater2") end
 local presets = include("menu/gwater2_presets.lua")
+local cloth = include("menu/gwater2_cloth.lua")
 
 -- garry, sincerely... fuck you
 timer.Simple(0, function() 
@@ -472,6 +498,8 @@ local function create_menu()
 	hook.Run("GWater2MenuAfterTab", "interaction", _tab)
 	local _tab = paramstabs.developer_tab(tabs)
 	hook.Run("GWater2MenuAfterTab", "developer", _tab)
+	local _tab = cloth.cloth_tab(tabs)
+	hook.Run("GWater2MenuAfterTab", "cloth", _tab)
 	hook.Run("GWater2MenuAfterTab", "presets", presets.presets_tab(tabs, _parameters, _visuals, _performance, _interaction))
 	hook.Run("GWater2MenuAfterTab", "supporters", supporters_tab(tabs))
 	hook.Run("GWater2MenuAfterTab", "menu", menu_tab(tabs))
