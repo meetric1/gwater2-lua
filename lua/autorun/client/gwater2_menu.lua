@@ -1,3 +1,4 @@
+---@diagnostic disable: inject-field
 AddCSLuaFile()
 
 if SERVER or not gwater2 then return end
@@ -12,7 +13,8 @@ gwater2.options = gwater2.options or {
 	blur_passes = CreateClientConVar("gwater2_blur_passes", "3", true),
 	absorption = CreateClientConVar("gwater2_absorption", "1", true),
 	depth_fix = CreateClientConVar("gwater2_depth_fix", "0", true),
-	menu_key = CreateClientConVar("gwater2_menu2key", KEY_G, true),
+	menu_key = CreateClientConVar("gwater2_menu2key", tostring(KEY_G), true),
+	-- to keep luals from bitching                    ^^^^^^^^^^^^^^^   
 	menu_tab = CreateClientConVar("gwater2_menu2tab", "1", true),
 
 	config_cache = nil,
@@ -189,7 +191,7 @@ local function create_menu()
 	local pixelated = "hell"
 	function sim_preview:Paint(w, h)
 		styling.draw_main_background(0, 0, w, h)
-		local x, y = sim_preview:LocalToScreen()
+		local x, y = sim_preview:LocalToScreen(0, 0)
 		local function exp(v) return Vector(math.exp(v[1]), math.exp(v[2]), math.exp(v[3])) end
 		local is_translucent = gwater2.options.parameters.color.real.a < 255
 		local radius = gwater2.options.solver:GetParameter("radius")
@@ -214,6 +216,8 @@ local function create_menu()
 				["$ignorez"] = 1
 			})
 		end
+
+		---@cast particle_material IMaterial
 
 		gwater2.options.solverd.average_fps = gwater2.options.solverd.average_fps + (RealFrameTime() - gwater2.options.solverd.average_fps) * 0.01
 		surface.SetMaterial(particle_material)
@@ -248,6 +252,7 @@ local function create_menu()
 
 	if not gwater2.options.read_config().preview then
 		sim_preview:SetVisible(false)
+		---@diagnostic disable-next-line: param-type-mismatch
 		divider:SetLeft(nil)
 		divider:SetLeftWidth(0)
 		divider:SetLeftMin(0)
@@ -262,6 +267,7 @@ local function create_menu()
 	end
 	--tabs:Dock(FILL)
 	tabs:SetFadeTime(0)
+	---@diagnostic disable-next-line: cast-local-type
 	help_text = help_text:Add("DLabel")
 	help_text:Dock(FILL)
 	help_text:DockMargin(5, 5, 5, 5)
@@ -287,6 +293,7 @@ local function create_menu()
 		local tab = vgui.Create("DPanel", tabs)
 		function tab:Paint() end
 		tabs:AddSheet(util.get_localised("About Tab.title"), tab, "icon16/exclamation.png").Tab.realname = "About Tab"
+		---@diagnostic disable-next-line: cast-local-type
 		tab = tab:Add("GF_ScrollPanel")
 		tab:Dock(FILL)
 
@@ -342,7 +349,7 @@ local function create_menu()
 		label:SetContentAlignment(7)
 		label:SetFont("GWater2Param")
 
-		local supporters = file.Read("gwater2_patrons.lua", "LUA") or "<Failed to load patron data!>"
+		local supporters = include("gwater2_patrons.lua") or "<Failed to load patron data!>"
 		--[[
 
 		-- Hi - Xenthio
@@ -416,6 +423,7 @@ local function create_menu()
 	        	gwater2.options.write_config({["preview"]=val})
 	        	sim_preview:SetVisible(val)
 	        	if not val then
+					---@diagnostic disable-next-line: param-type-mismatch
 	        		divider:SetLeft(nil)
 	        		divider:SetLeftWidth(0)
 					divider:SetLeftMin(0)
@@ -501,6 +509,9 @@ local function create_menu()
 		end
 	end
 
+	-- to keep luals happy
+	tabs.Items = tabs.Items or {}
+
 	tabs:SetActiveTab(tabs.Items[gwater2.options.menu_tab:GetInt() ~= 1 and 1 or 2].Tab)
 	function tabs:OnActiveTabChanged(_, new)
 		help_text:SetText(util.get_localised(new.realname..".help"))
@@ -568,7 +579,7 @@ concommand.Add("gwater2_menu2", function()
 end)
 
 hook.Add("GUIMousePressed", "gwater2_menu2close", function(mouse_code, aim_vector)
-	if not IsValid(frame) then return end
+	if not IsValid(gwater2.options.frame) then return end
 
 	local x, y = gui.MouseX(), gui.MouseY()
 	local frame_x, frame_y = gwater2.options.frame:GetPos()
@@ -579,8 +590,11 @@ end)
 
 hook.Add("PopulateToolMenu", "gwater2_menu2", function()
     spawnmenu.AddToolMenuOption("Utilities", "gwater2", "gwater2_menu2", "Menu Rewrite Options", "", "", function(panel)
+		---@diagnostic disable-next-line: undefined-field
 		panel:ClearControls()
+		---@diagnostic disable-next-line: undefined-field
 		panel:Button("Open Menu", "gwater2_menu2")
+		---@diagnostic disable-next-line: undefined-field
         panel:KeyBinder("Menu Key", "gwater2_menu2key")
 	end)
 end)

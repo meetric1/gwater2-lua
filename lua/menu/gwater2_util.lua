@@ -38,7 +38,6 @@ local function set_gwater_parameter(option, val)
 		val[5] = "COLOR"
 		parsed = true
 	end
-	parsed = nil
 
 	gwater2.ChangeParameter(option, val)
 
@@ -106,7 +105,7 @@ local function set_gwater_parameter(option, val)
 		gwater2.options.solver:SetParameter("cohesion", math.min(gwater2["cohesion"] / val * 10, 1))
 	end
 
-	if option != "diffuse_threshold" and option != "dynamic_friction" then -- hack hack hack! fluid preview doesn't use diffuse particles
+	if option ~= "diffuse_threshold" and option ~= "dynamic_friction" then -- hack hack hack! fluid preview doesn't use diffuse particles
 		gwater2.options.solver:SetParameter(option, val)
 	end
 end

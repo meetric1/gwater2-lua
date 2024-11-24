@@ -12,6 +12,7 @@ if SERVER then
 	util.AddNetworkString("GWATER2_CHANGEPARAMETER")
 	util.AddNetworkString("GWATER2_REQUESTPARAMETERSSNAPSHOT")
 
+	---@diagnostic disable-next-line: lowercase-global
 	gwater2 = {
 		parameters = {},
 
@@ -212,7 +213,7 @@ else	-- CLIENT
 					local pos = Vector(x, y, z)
 					--local hit = 0
 					for _, v in ipairs(colliders) do
-						if v:TraceBox(Vector(0, 0, 0), Angle(), pos, pos, Vector(-offset, -offset, -offset), Vector(offset, offset, offset)) then
+						if v:TraceBox(Vector(0, 0, 0), Angle(0), pos, pos, Vector(-offset, -offset, -offset), Vector(offset, offset, offset)) then
 							--hit = 255
 							-- Add particle
 							local vel = extra.vel and extra.vel or phys:GetVelocityAtPoint(phys:LocalToWorld(pos))

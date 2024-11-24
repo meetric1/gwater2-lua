@@ -1,3 +1,4 @@
+---@diagnostic disable: inject-field
 AddCSLuaFile()
 
 if SERVER or not gwater2 then return end
@@ -42,6 +43,7 @@ local function create_blocking_frame(mainFrame)
 		-- Blur background
 		render.UpdateScreenEffectTexture()
 		render.BlurRenderTarget(render.GetScreenEffectTexture(), 5, 5, 1)
+---@diagnostic disable-next-line: missing-parameter
 		render.SetRenderTarget()
 		render.DrawScreenQuad()
 
@@ -62,6 +64,7 @@ local function create_blocking_frame(mainFrame)
 	
 	local close = frame.Close
 	function frame:Close()
+---@diagnostic disable-next-line: undefined-field
 		frame:GetParent():Close()
 		close(frame)
 	end

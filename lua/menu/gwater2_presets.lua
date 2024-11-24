@@ -1,3 +1,4 @@
+---@diagnostic disable: inject-field
 -- CAUTION!!
 -- This is not a "custompresets" file. Instead, use import functionality in presets tab.
 -- This file contains code used to generate, parse, and handle presets.
@@ -303,6 +304,7 @@ function gwater2.options.read_preset(preset)
 				if value ~= (2^31-1) then value = tonumber(value) end
 				name = "VISL/"..name
 			end
+			---@diagnostic disable-next-line: assign-type-mismatch
 			preset[name] = value
 		end
 		return {name, preset}
@@ -474,8 +476,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 		return selector
 	end
 	for k,v in SortedPairs(presets) do
-		k2 = k:sub(5)
-		mk_selector(k2, v, k)
+		mk_selector(k:sub(5), v, k)
 	end
 	local function mk_save_btn()
 		local div = local_presets:Add("DLabel")
@@ -539,6 +540,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 				local_presets:GetChildren()[#local_presets:GetChildren()-1]:Remove()
 				local_presets:GetChildren()[#local_presets:GetChildren()-2]:Remove()
 				local m = 0
+				---@diagnostic disable-next-line: cast-local-type
 				for k,v in SortedPairs(presets) do m = tonumber(k:sub(1, 3)) end
 				mk_selector(name, preset, string.format("%03d-%s", m+1, name))
 				presets[string.format("%03d-%s", m+1, name)] = preset
@@ -815,6 +817,7 @@ local function presets_tab(tabs, _parameters, _visuals, _performance, _interacti
 				local_presets:GetChildren()[#local_presets:GetChildren()-1]:Remove()
 				local_presets:GetChildren()[#local_presets:GetChildren()-2]:Remove()
 				local m = 0
+				---@diagnostic disable-next-line: cast-local-type
 				for k,v in SortedPairs(presets) do m = tonumber(k:sub(1, 3)) end
 				mk_selector(textarea:GetValue(), preset, string.format("%03d-%s", m+1, textarea:GetValue()))
 				presets[string.format("%03d-%s", m+1, textarea:GetValue())] = preset

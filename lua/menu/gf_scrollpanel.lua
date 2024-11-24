@@ -1,4 +1,6 @@
+---@diagnostic disable: undefined-field, inject-field
 -- Smooth scrollbar (code from Spanky)
+---@class GF_ScrollPanel: DScrollPanel
 local GFScrollPanel = {}
 AccessorFunc(GFScrollPanel, "scrolldistance", "ScrollDistance", FORCE_NUMBER)
 function GFScrollPanel:Init()

@@ -1,4 +1,6 @@
 AddCSLuaFile()
+-- to keep luals happy
+do SF = SF or {} end
 local checkluatype = SF.CheckLuaType
 local registerprivilege = SF.Permissions.registerPrivilege
 

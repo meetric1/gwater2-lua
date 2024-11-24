@@ -1,3 +1,4 @@
+---@diagnostic disable: inject-field
 AddCSLuaFile()
 
 if SERVER or not gwater2 then return end
@@ -43,12 +44,6 @@ local parameters = {
 			["006-Surface Tension"] = {
 				min=0,
 				max=1,
-				decimals=2,
-				type="scratch"
-			},
-			["007-Timescale"] = {
-				min=0,
-				max=2,
 				decimals=2,
 				type="scratch"
 			},

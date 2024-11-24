@@ -1,3 +1,6 @@
+---@diagnostic disable: param-type-mismatch
+-- The GWater 2 Render Pipeline
+
 local function get_gwater_rt(name, mult, depth) 
 	mult = mult or 1
 	return GetRenderTargetEx(name, ScrW() * mult, ScrH() * mult,
@@ -30,7 +33,8 @@ local blur_scale = CreateClientConVar("gwater2_blur_scale", "1", true)
 
 local debug_absorption = CreateClientConVar("gwater2_debug_absorption", "0", false)
 local debug_normals = CreateClientConVar("gwater2_debug_normals", "0", false)
-local debug_depth = CreateClientConVar("gwater2_debug_depth", "0", false)
+local debug_blur = CreateClientConVar("gwater2_debug_blur", "0", false)
+local debug_mipmap = CreateClientConVar("gwater2_debug_mipmap", "0", false)
 
 -- sets up a lighting origin in sourceengine
 -- TODO: cache your fucking tables and csmodels!!!
@@ -55,7 +59,7 @@ local function do_absorption()
 
 	-- depth absorption (disabled when opaque liquids are enabled)
 	local _, _, _, a = water:GetVector4D("$color2")
-	if water_volumetric:GetFloat("$alpha") != 0 and a > 0 and a < 255 then
+	if water_volumetric:GetFloat("$alpha") ~= 0 and a > 0 and a < 255 then
 		-- ANTIALIAS FIX! (courtesy of Xenthio)
 			-- how it works: 
 			-- Clear the main rendertarget, keeping depth
@@ -197,7 +201,8 @@ hook.Add("PostDrawOpaqueRenderables", "gwater2_render", function(depth, sky, sky
 	local dbg = 0
 	if debug_absorption:GetBool() then render.DrawTextureToScreenRect(cache_absorption, ScrW() * 0.75, (ScrH() / 4) * dbg, ScrW() / 4, ScrH() / 4); dbg = dbg + 1 end
 	if debug_normals:GetBool() then render.DrawTextureToScreenRect(cache_normals, ScrW() * 0.75, (ScrH() / 4) * dbg, ScrW() / 4, ScrH() / 4); dbg = dbg + 1 end
-	if debug_depth:GetBool() then render.DrawTextureToScreenRect(cache_depth, ScrW() * 0.75, (ScrH() / 4) * dbg, ScrW() / 4, ScrH() / 4); dbg = dbg + 1 end
+	if debug_blur:GetBool() then render.DrawTextureToScreenRect(cache_blur, ScrW() * 0.75, (ScrH() / 4) * dbg, ScrW() / 4, ScrH() / 4); dbg = dbg + 1 end
+	if debug_mipmap:GetBool() then render.DrawTextureToScreenRect(cache_mipmap, ScrW() * 0.75, (ScrH() / 4) * dbg, ScrW() / 4, ScrH() / 4); dbg = dbg + 1 end
 end)
 
 --hook.Add("NeedsDepthPass", "gwater2_depth", function()
