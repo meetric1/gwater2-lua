@@ -1,11 +1,13 @@
 AddCSLuaFile()
 
-local in_water = include("gwater2_swimming.lua")
-include("gwater2_net.lua")
-
-if SERVER then return end
+if SERVER then 
+	include("gwater2_net.lua")
+	include("gwater2_interactions.lua")
+	return
+end
 
 require((BRANCH == "x86-64" or BRANCH == "chromium" ) and "gwater2" or "gwater2_main")	-- carrying
+
 include("gwater2_shaders.lua")
 
 -- GetMeshConvexes but for client
@@ -83,6 +85,10 @@ local function get_map_vertices()
 	return all_vertices
 end
 
+-- to keep luals happy
+local in_water = function(...) end
+
+---@diagnostic disable-next-line: lowercase-global
 gwater2 = {
 	solver = FlexSolver(100000),
 	renderer = FlexRenderer(),
@@ -108,7 +114,7 @@ gwater2 = {
 
 				gwater2.solver:SetColliderPos(index, ent:GetPos())
 				gwater2.solver:SetColliderAng(index, ent:GetAngles())
-				gwater2.solver:SetColliderEnabled(index, ent:GetCollisionGroup() != COLLISION_GROUP_WORLD and bit.band(ent:GetSolidFlags(), FSOLID_NOT_SOLID) == 0)
+				gwater2.solver:SetColliderEnabled(index, ent:GetCollisionGroup() ~= COLLISION_GROUP_WORLD and bit.band(ent:GetSolidFlags(), FSOLID_NOT_SOLID) == 0)
 			else
 				-- horrible code for proper ragdoll collision. Still breaks half the time. Fuck source
 				local bone_index = ent:TranslatePhysBoneToBone(rep)
@@ -125,7 +131,7 @@ gwater2 = {
 				end
 				gwater2.solver:SetColliderPos(index, pos)
 				gwater2.solver:SetColliderAng(index, ang)
-				gwater2.solver:SetColliderEnabled(index, ent:GetCollisionGroup() != COLLISION_GROUP_WORLD and bit.band(ent:GetSolidFlags(), FSOLID_NOT_SOLID) == 0)
+				gwater2.solver:SetColliderEnabled(index, ent:GetCollisionGroup() ~= COLLISION_GROUP_WORLD and bit.band(ent:GetSolidFlags(), FSOLID_NOT_SOLID) == 0)
 				if in_water(ent) then gwater2.solver:SetColliderEnabled(index, false) end
 			end
 		end
@@ -135,7 +141,7 @@ gwater2 = {
 		xpcall(function()
 			gwater2.solver:AddMapCollider(0, game.GetMap())
 		end, function(e)
-			gwater2.solver:AddConcaveCollider(0, get_map_vertices(), Vector(), Angle())
+			gwater2.solver:AddConcaveCollider(0, get_map_vertices(), Vector(), Angle(0))
 			if !err then
 				ErrorNoHaltWithStack("[GWater2]: Map BSP structure is unsupported. Reverting to brushes. Collision WILL have holes!")
 			end
@@ -157,6 +163,9 @@ gwater2 = {
 		return mat
 	end
 }
+
+include("gwater2_net.lua")
+in_water = include("gwater2_interactions.lua")
 
 -- setup percentage values (used in menu)
 gwater2["surface_tension"] = gwater2.solver:GetParameter("surface_tension") * gwater2.solver:GetParameter("radius")^4	-- dont ask me why its a power of 4
@@ -193,19 +202,25 @@ local function gwater_tick2()
 		end
 	end
 	
-	local particles_in_radius = gwater2.solver:GetParticlesInRadius(lp:GetPos() + lp:OBBCenter(), gwater2.solver:GetParameter("fluid_rest_distance") * 3, GWATER2_PARTICLES_TO_SWIM)
+	local particles_in_radius = gwater2.solver:GetParticlesInRadius(lp:GetPos() + lp:OBBCenter(), gwater2.solver:GetParameter("fluid_rest_distance") * 3)
 	GWATER2_QuickHackRemoveMeASAP(	-- TODO: REMOVE THIS HACKY SHIT!!!!!!!!!!!!!
 		lp:EntIndex(), 
 		particles_in_radius
 	)
+	---@diagnostic disable-next-line: inject-field
 	lp.GWATER2_CONTACTS = particles_in_radius
 
 	hook.Run("gwater2_posttick", gwater2.solver:Tick(limit_fps, 0))
 end
 
 timer.Create("gwater2_tick", limit_fps, 0, gwater_tick2)
-hook.Add("InitPostEntity", "gwater2_addprop", gwater2.reset_solver)
-hook.Add("OnEntityCreated", "gwater2_addprop", function(ent) timer.Simple(0, function() add_prop(ent) end) end)	// timer.0 so data values are setup correctly
+hook.Add("Tick", "gwater2_createworld", function()
+	hook.Remove("Tick", "gwater2_createworld")
+	timer.Simple(0, function() gwater2.reset_solver() end)
+end)
+hook.Add("OnEntityCreated", "gwater2_addprop", function(ent)
+	timer.Simple(0, function() add_prop(ent) end)
+end) -- timer.0 so data values are setup correctly
 
 -- gravgun support
 local can_fire = false
@@ -213,7 +228,7 @@ local last_fire = 0
 hook.Add("gwater2_posttick", "gwater2_gravgun_grab", function()
 	local lp = LocalPlayer()
 	local gravgun = lp:GetActiveWeapon()
-	if !IsValid(gravgun) or lp:GetActiveWeapon():GetClass() != "weapon_physcannon" then 
+	if !IsValid(gravgun) or lp:GetActiveWeapon():GetClass() ~= "weapon_physcannon" then 
 		can_fire = false
 		return 
 	end
@@ -224,7 +239,7 @@ hook.Add("gwater2_posttick", "gwater2_gravgun_grab", function()
 	end
 
 	-- left click (punt)
-	if can_fire and last_fire != gravgun:GetNextPrimaryFire() then
+	if can_fire and last_fire ~= gravgun:GetNextPrimaryFire() then
 		last_fire = gravgun:GetNextPrimaryFire()
 		gwater2.solver:AddForceField(lp:EyePos(), 320, 200, 1, false)
 	else
