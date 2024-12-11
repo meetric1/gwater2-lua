@@ -12,7 +12,7 @@ include("gwater2_shaders.lua")
 local function unfucked_get_mesh(ent, raw)
 	-- Physics object exists
 	local phys = ent:GetPhysicsObject()
-	if phys:IsValid() then return phys:GetMesh() end
+	if phys:IsValid() then return (raw and phys:GetMesh() or phys:GetMeshConvexes()) end
 
 	local model = ent:GetModel()
 	local is_ragdoll = util.IsValidRagdoll(model)
@@ -24,6 +24,12 @@ local function unfucked_get_mesh(ent, raw)
 		convexes = phys:IsValid() and (raw and phys:GetMesh() or phys:GetMeshConvexes())
 		cs_ent:Remove()
 	else 
+		-- no joke this is the hackiest shit ive ever done. 
+		-- for whatever reason the metrocop and ONLY the metrocop model has this problem
+		-- when creating a clientside ragdoll of the metrocop entity it will sometimes break all pistol and stunstick animations
+		-- I have no idea why this happens.
+		if model == "models/police.mdl" then model = "models/combine_soldier.mdl" end
+
 		local cs_ent = ClientsideRagdoll(model)
 		convexes = {}
 		for i = 0, cs_ent:GetPhysicsObjectCount() - 1 do
@@ -37,24 +43,28 @@ end
 
 -- adds entity to FlexSolver
 local function add_prop(ent)
-	if !IsValid(ent) or !ent:IsSolid() or ent:IsWeapon() or !ent:GetModel() then return end
+	if !IsValid(ent) then return end
+	
+	local ent_index = ent:EntIndex()
+	gwater2.solver:RemoveCollider(ent_index) -- incase source decides to reuse the same entity index
 
-	-- Note: if we want to respect no collide from the tool or context menu, check for COLLISION_GROUP_WORLD
-	-- if ent:GetCollisionGroup() == COLLISION_GROUP_WORLD or (IsValid(ent:GetPhysicsObject()) and (!ent:GetPhysicsObject():IsCollisionEnabled())) then return end
+	if !ent:IsSolid() or ent:IsWeapon() or !ent:GetModel() then return end
 
 	local convexes = unfucked_get_mesh(ent)
 	if !convexes then return end
 
+	ent.GWATER2_IS_RAGDOLL = util.IsValidRagdoll(ent:GetModel())
+	
 	if #convexes < 16 then	-- too many convexes to be worth calculating
 		for k, v in ipairs(convexes) do
 			if #v <= 64 * 3 then	-- hardcoded limits.. No more than 64 planes per convex as it is a FleX limitation
-				gwater2.solver:AddConvexCollider(ent:EntIndex(), v, ent:GetPos(), ent:GetAngles())
+				gwater2.solver:AddConvexCollider(ent_index, v, ent:GetPos(), ent:GetAngles())
 			else
-				gwater2.solver:AddConcaveCollider(ent:EntIndex(), v, ent:GetPos(), ent:GetAngles())
+				gwater2.solver:AddConcaveCollider(ent_index, v, ent:GetPos(), ent:GetAngles())
 			end
 		end
 	else
-		gwater2.solver:AddConcaveCollider(ent:EntIndex(), unfucked_get_mesh(ent, true), ent:GetPos(), ent:GetAngles())
+		gwater2.solver:AddConcaveCollider(ent_index, unfucked_get_mesh(ent, true), ent:GetPos(), ent:GetAngles())
 	end
 
 end
@@ -84,7 +94,18 @@ gwater2 = {
 		if !IsValid(ent) then 
 			gwater2.solver:RemoveCollider(id)
 		else 
-			if !util.IsValidRagdoll(ent:GetModel()) then
+			if !ent.GWATER2_IS_RAGDOLL then
+
+				-- custom physics objects may be networked and initialized after the entity was created
+				if ent.GWATER2_PHYSOBJ or ent:GetPhysicsObjectCount() != 0 then
+					local phys = ent:GetPhysicsObject()	-- slightly expensive operation
+
+					if !IsValid(ent.GWATER2_PHYSOBJ) or ent.GWATER2_PHYSOBJ != phys then	-- we know physics object was recreated with a PhysicsInit* function
+						add_prop(ent)	-- internally cleans up entity colliders
+						ent.GWATER2_PHYSOBJ = phys
+					end
+				end
+
 				gwater2.solver:SetColliderPos(index, ent:GetPos())
 				gwater2.solver:SetColliderAng(index, ent:GetAngles())
 				gwater2.solver:SetColliderEnabled(index, ent:GetCollisionGroup() != COLLISION_GROUP_WORLD and bit.band(ent:GetSolidFlags(), FSOLID_NOT_SOLID) == 0)
@@ -153,20 +174,31 @@ gwater2["force_multiplier"] = 0.01
 gwater2["force_buoyancy"] = 0
 gwater2["force_dampening"] = 0
 
+local no_lerp = false
 local limit_fps = 1 / 60
 local function gwater_tick2()
 	local lp = LocalPlayer()
 	if !IsValid(lp) then return end
 
-	gwater2.solver:ApplyContacts(limit_fps * gwater2["force_multiplier"], 3, gwater2["force_buoyancy"], gwater2["force_dampening"])
+	if gwater2.solver:GetActiveParticles() <= 0 then 
+		no_lerp = true
+	else
+		gwater2.solver:ApplyContacts(limit_fps * gwater2["force_multiplier"], 3, gwater2["force_buoyancy"], gwater2["force_dampening"])
+		gwater2.solver:IterateColliders(gwater2.update_colliders)
+
+		-- collisions will lerp from positions they were at a long time ago if no particles have been initialized for a while
+		if no_lerp then 
+			gwater2.solver:IterateColliders(gwater2.update_colliders) 
+			no_lerp = false
+		end
+	end
+	
 	local particles_in_radius = gwater2.solver:GetParticlesInRadius(lp:GetPos() + lp:OBBCenter(), gwater2.solver:GetParameter("fluid_rest_distance") * 3, GWATER2_PARTICLES_TO_SWIM)
 	GWATER2_QuickHackRemoveMeASAP(	-- TODO: REMOVE THIS HACKY SHIT!!!!!!!!!!!!!
-	lp:EntIndex(), 
+		lp:EntIndex(), 
 		particles_in_radius
 	)
 	lp.GWATER2_CONTACTS = particles_in_radius
-
-	gwater2.solver:IterateColliders(gwater2.update_colliders)
 
 	hook.Run("gwater2_posttick", gwater2.solver:Tick(limit_fps, 0))
 end

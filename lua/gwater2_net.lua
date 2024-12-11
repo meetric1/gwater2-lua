@@ -36,8 +36,8 @@ if SERVER then
 			net.Broadcast()
 		end,
 
-		AddCube = function(translation, size, particle_data)
-			net.Start("GWATER2_ADDCUBE")
+		AddCube = function(translation, size, particle_data, unreliable)
+			net.Start("GWATER2_ADDCUBE", unreliable)
 				net.WriteMatrix(translation)
 				net.WriteUInt(size[1], 8)
 				net.WriteUInt(size[2], 8)
@@ -46,8 +46,8 @@ if SERVER then
 			net.Broadcast()
 		end,
 		
-		AddParticle = function(pos, particle_data)
-			net.Start("GWATER2_ADDPARTICLE")
+		AddParticle = function(pos, particle_data, unreliable)
+			net.Start("GWATER2_ADDPARTICLE", unreliable)
 				net.WriteVector(pos)
 				net.WriteTable(particle_data or {})
 			net.Broadcast()

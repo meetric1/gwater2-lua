@@ -12,7 +12,7 @@ end
 local cache_screen0 = render.GetScreenEffectTexture()
 local cache_screen1 = render.GetScreenEffectTexture(1)
 local cache_mipmap = get_gwater_rt("gwater2_mipmap", 1 / 1)
-local cache_absorption = get_gwater_rt("gwater2_absorption", 1 / 2, MATERIAL_RT_DEPTH_NONE)
+local cache_absorption = get_gwater_rt("gwater2_absorption", 1 / 4, MATERIAL_RT_DEPTH_NONE)
 local cache_normals = get_gwater_rt("gwater2_normals", 1 / 1, MATERIAL_RT_DEPTH_SEPARATE)
 local cache_blur = get_gwater_rt("gwater2_blur", 1 / 2)
 
@@ -38,11 +38,18 @@ local function unfuck_lighting(pos0, pos1)
 	render.OverrideColorWriteEnable(false, false)
 end
 
+local lightpos = EyePos()
 local function do_cloth()
 	unfuck_lighting(gwater2.cloth_pos, gwater2.cloth_pos)	-- fix cloth lighting, mostly
 	render.SetMaterial(cloth)
 	gwater2.renderer:DrawCloth()
 	render.RenderFlashlights(function() gwater2.renderer:DrawCloth() end)
+
+	-- setup water lighting
+	--local tr = util.QuickTrace( EyePos(), LocalPlayer():EyeAngles():Forward() * 800, LocalPlayer())
+	--local dist = math.min(230, (tr.HitPos - tr.StartPos):Length() / 1.5)	
+	--lightpos = LerpVector(1.6 * FrameTime(), lightpos, EyePos() + (LocalPlayer():EyeAngles():Forward() * dist))	-- fucking hell
+	unfuck_lighting(EyePos(), EyePos())	
 end
 
 local function do_absorption()
@@ -65,6 +72,11 @@ local function do_absorption()
 		gwater2.renderer:DrawWater()
 		render.CopyTexture(render.GetRenderTarget(), cache_absorption)
 		render.DrawTextureToScreen(cache_screen0)
+
+		--render.PushRenderTarget(cache_absorption)
+		--render.SetMaterial(water_volumetric)
+		--gwater2.renderer:DrawWater()
+		--render.PopRenderTarget()
 	else
 		-- no absorption calculations, so just use solid color
 		render.PushRenderTarget(cache_absorption)
@@ -82,6 +94,7 @@ local function do_diffuse_inside()
 		render.SetMaterial(water_bubble)
 		render.UpdateScreenEffectTexture(1)
 		gwater2.renderer:DrawDiffuse()
+		render.RenderFlashlights(function() gwater2.renderer:DrawDiffuse() end)
 		render.CopyTexture(render.GetRenderTarget(), cache_screen0)
 		render.DrawTextureToScreen(cache_screen1)
 	end
@@ -122,7 +135,7 @@ local function do_normals()
 	water_blur:SetTexture("$depthtexture", cache_mipmap)
 	render.SetMaterial(water_blur)
 	for i = 1, blur_passes:GetInt() do
-		local scale = (0.3 / math.max(i, 2)) * blur_scale:GetFloat()
+		local scale = (0.3 / i) * blur_scale:GetFloat()
 
 		-- Blur X
 		water_blur:SetTexture("$normaltexture", cache_normals)
@@ -145,18 +158,11 @@ local function do_normals()
 	render.SetStencilEnable(false)
 end
 
-local lightpos = EyePos()
 local function do_finalpass()
 	local radius = gwater2.solver:GetParameter("radius")
 
-	-- setup water lighting
-	local tr = util.QuickTrace( EyePos(), LocalPlayer():EyeAngles():Forward() * 800, LocalPlayer())
-	local dist = math.min(230, (tr.HitPos - tr.StartPos):Length() / 1.5)	
-	lightpos = LerpVector(0.8 * FrameTime(), lightpos, EyePos() + (LocalPlayer():EyeAngles():Forward() * dist))	-- fucking hell
-	unfuck_lighting(EyePos(), lightpos)	
-
 	-- Setup water material parameters
-	water:SetFloat("$radius", radius)
+	water:SetFloat("$radius", radius * 2)
 	water:SetTexture("$normaltexture", cache_normals)
 	water:SetTexture("$depthtexture", cache_absorption)
 	render.SetMaterial(water)
@@ -165,7 +171,16 @@ local function do_finalpass()
 
 	render.SetMaterial(water_mist)
 	gwater2.renderer:DrawDiffuse()
+	render.RenderFlashlights(function() gwater2.renderer:DrawDiffuse() end)
 end
+
+--[[
+hook.Add("RenderScene", "gwater2_render", function(eye_pos, eye_angles, fov)
+	cam.Start3D(eye_pos, eye_angles, fov)
+		gwater2.renderer:SetHang(false)
+		gwater2.renderer:BuildMeshes(gwater2.solver, 0.25)
+	cam.End3D()
+end)]]
 
 -- gwater2 shader pipeline
 hook.Add("PostDrawOpaqueRenderables", "gwater2_render", function(depth, sky, sky3d)	--PreDrawViewModels
@@ -188,7 +203,7 @@ hook.Add("PostDrawOpaqueRenderables", "gwater2_render", function(depth, sky, sky
 	do_normals()
 	do_finalpass()
 
-	--render.DrawTextureToScreenRect(cache_normals, 0, 0, ScrW() / 4, ScrH() / 4)
+	--render.DrawTextureToScreenRect(cache_absorption, 0, 0, ScrW() / 4, ScrH() / 4)
 end)
 
 --hook.Add("NeedsDepthPass", "gwater2_depth", function()
